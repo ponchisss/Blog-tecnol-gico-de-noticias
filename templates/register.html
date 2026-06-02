@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrarse - TECHLOG{% endblock %}
+
+{% block content %}
+<div class="form-card" id="register-form-card">
+    <header class="form-header">
+        <h2 class="form-title" id="register-title">Crear Cuenta</h2>
+        <p class="form-subtitle" id="register-subtitle">Únete al blog tecnológico y recibe noticias exclusivas</p>
+    </header>
+
+    <form action="{{ url_for('register') }}" method="POST" id="register-submit-form">
+        <div class="form-group">
+            <label for="email" class="form-label">Correo Electrónico</label>
+            <input type="email" name="email" id="email" class="form-control" placeholder="nombre@correo.com" required autocomplete="email">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 2rem;">
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password" name="password" id="password" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 0.8rem; border-radius: 8px; font-weight: 700; cursor: pointer; border:none;" id="register-btn-submit">Registrarse</button>
+    </form>
+
+    <footer class="form-footer" id="register-footer">
+        <p>¿Ya tienes una cuenta? <a href="{{ url_for('login') }}" id="go-to-login">Inicia sesión</a></p>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1.5rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:1rem;">
+            * Se requiere verificación por código de seguridad enviado por email (simulado en el panel/buzón o real por Gmail).
+        </p>
+    </footer>
+</div>
+{% endblock %}

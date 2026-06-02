@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blog Tecnológico Automatizado{% endblock %}</title>
+    <!-- SEO Optimization Meta Tags -->
+    <meta name="description" content="{% block description %}Sitio web de noticias tecnológicas automatizado con panel de administración inteligente, roles dinámicos y editor visual interactivo.{% endblock %}">
+    <meta name="keywords" content="Tecnología, IA, Software, Hardware, Ciberseguridad, Noticias, Blog">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom Theme Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar Header -->
+    <nav class="navbar" id="nav-header">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-logo" id="nav-logo-link">TECHLOG</a>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}" id="nav-home">Noticias</a></li>
+                {% if logged_in and user_role in ['Admin', 'Editor'] %}
+                    <li><a href="{{ url_for('admin_panel') }}" class="nav-link {% if request.path == '/admin' %}active{% endif %}" id="nav-admin">Panel Admin</a></li>
+                {% endif %}
+            </ul>
+            <div class="nav-auth-actions" id="nav-auth-container">
+                {% if logged_in %}
+                    <div class="user-badge" id="nav-user-badge">
+                        <span>{{ user_email }}</span>
+                        <span class="user-role role-{{ user_role | lower }}" id="nav-user-role-lbl">{{ user_role }}</span>
+                        <a href="{{ url_for('logout') }}" class="btn-outline btn-sm" style="border-radius: 6px;" id="nav-logout-btn">Salir</a>
+                    </div>
+                {% else %}
+                    <div style="display: flex; gap: 1rem;">
+                        <a href="{{ url_for('login') }}" class="btn-outline nav-btn" id="nav-login-btn">Iniciar Sesión</a>
+                        <a href="{{ url_for('register') }}" class="btn-primary nav-btn" id="nav-register-btn">Registrarse</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="container" id="main-content-body">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Toast Container for Animated Alerts -->
+    <div class="toast-container" id="toast-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast toast-{{ category }}" id="toast-flash-{{ loop.index }}">
+                        <span>
+                            {% if category == 'success' %}✅
+                            {% elif category == 'error' %}❌
+                            {% elif category == 'warning' %}⚠️
+                            {% else %}⚡{% endif %}
+                        </span>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer-section">
+        <div class="footer-container">
+            <p>&copy; 2026 TECHLOG - Blog Tecnológico. Creado con Antigravity IDE & Gemini.</p>
+            <ul class="footer-links" id="footer-nav-links">
+                <li><a href="{{ url_for('index') }}">Inicio</a></li>
+                {% if not logged_in %}
+                    <li><a href="{{ url_for('login') }}">Acceso Admin</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('logout') }}">Cerrar Sesión</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript Assets -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Dismiss flash toasts automatically after 4 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.toast-container .toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.style.transition = 'all 0.5s ease-out';
+                    toast.style.transform = 'translateX(120%)';
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 500);
+                }, 4000);
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

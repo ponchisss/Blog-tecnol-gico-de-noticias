@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Verificar Cuenta - TECHLOG{% endblock %}
+
+{% block content %}
+<div class="form-card verification-container" id="verify-form-card">
+    <header class="form-header">
+        <span style="font-size: 3rem;">✉️</span>
+        <h2 class="form-title" style="margin-top: 1rem;" id="verify-title">Verifica tu Cuenta</h2>
+        <p class="form-subtitle" id="verify-subtitle">Ingresa el código de 6 dígitos que enviamos a <strong>{{ temp_email }}</strong></p>
+    </header>
+
+    <form action="{{ url_for('verify') }}" method="POST" id="verify-submit-form">
+        <!-- We can use a single text box or split boxes. A styled text input looks clean and is super robust for mobile copy-paste -->
+        <div class="form-group" style="margin: 2rem 0;">
+            <input type="text" name="code" id="verification-code-input" class="form-control" 
+                   placeholder="000000" maxlength="6" pattern="[0-9]{6}" required 
+                   style="text-align: center; font-size: 2.2rem; font-weight: 800; letter-spacing: 10px; color: var(--accent-pink); font-family: monospace; padding: 0.8rem 0;">
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 0.8rem; border-radius: 8px; font-weight: 700; cursor: pointer; border:none;" id="verify-btn-submit">Verificar Cuenta</button>
+    </form>
+
+    <footer class="form-footer" id="verify-footer" style="margin-top: 2rem;">
+        <p>¿No recibiste el código?</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+            Si estás en <strong>Modo Desarrollo/Simulación</strong>, puedes ver los códigos generados en el **Panel de Administración -> Buzón Virtual** iniciando sesión con la cuenta de administrador.
+        </p>
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
+            <a href="{{ url_for('login') }}" class="btn-outline btn-sm">Volver al Login</a>
+        </div>
+    </footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Focus verification input automatically
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('verification-code-input');
+        if (input) {
+            input.focus();
+            
+            // Limit input to digits only
+            input.addEventListener('input', (e) => {
+                input.value = input.value.replace(/[^0-9]/g, '');
+            });
+        }
+    });
+</script>
+{% endblock %}

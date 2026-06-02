@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio - TECHLOG Blog Tecnológico{% endblock %}
+
+{% block content %}
+<!-- Hero Header Section -->
+<header class="hero-section" id="blog-hero">
+    <h1 class="hero-title" id="blog-main-heading">Descubre el Futuro de la Tecnología</h1>
+    <p class="hero-subtitle" id="blog-main-desc">Artículos de calidad, análisis profundos y las últimas novedades de la Inteligencia Artificial, Ciberseguridad, Desarrollo de Software y Hardware.</p>
+    
+    <!-- Search Interface -->
+    <form action="{{ url_for('index') }}" method="GET" class="search-container" id="search-form">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" value="{{ query }}" placeholder="Buscar noticias tecnológicas..." class="search-input" id="search-box">
+        {% if category %}
+            <input type="hidden" name="category" value="{{ category }}">
+        {% endif %}
+    </form>
+
+    <!-- Categories Navigation Bar -->
+    <div class="categories-bar" id="category-filter-bar">
+        <a href="{{ url_for('index', q=query) }}" class="category-chip {% if not category %}active{% endif %}" id="cat-all">Todos</a>
+        <a href="{{ url_for('index', category='IA', q=query) }}" class="category-chip {% if category == 'IA' %}active{% endif %}" id="cat-ia">Inteligencia Artificial</a>
+        <a href="{{ url_for('index', category='Software', q=query) }}" class="category-chip {% if category == 'Software' %}active{% endif %}" id="cat-software">Software</a>
+        <a href="{{ url_for('index', category='Hardware', q=query) }}" class="category-chip {% if category == 'Hardware' %}active{% endif %}" id="cat-hardware">Hardware</a>
+        <a href="{{ url_for('index', category='Ciberseguridad', q=query) }}" class="category-chip {% if category == 'Ciberseguridad' %}active{% endif %}" id="cat-security">Ciberseguridad</a>
+    </div>
+</header>
+
+<!-- News Articles Grid -->
+<section class="articles-grid" id="articles-showcase-grid">
+    {% if articles %}
+        {% for article in articles %}
+            <article class="article-card" id="article-card-{{ article.id }}">
+                <div class="card-img-wrapper">
+                    <img src="{{ article.image_url }}" alt="{{ article.title }}" class="card-img" loading="lazy">
+                    <span class="card-category">{{ article.category }}</span>
+                </div>
+                <div class="card-content">
+                    <span class="card-date">{{ article.created_at[:10] }}</span>
+                    <h3 class="card-title">{{ article.title }}</h3>
+                    <p class="card-summary">{{ article.summary }}</p>
+                    <div class="card-footer">
+                        <span class="card-author">{{ article.author_email.split('@')[0] }}</span>
+                        <a href="{{ url_for('view_article', id=article.id) }}" class="card-more" id="read-more-{{ article.id }}">Leer más</a>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        <div class="no-results" id="no-results-alert">
+            <span style="font-size: 3rem;">🛰️</span>
+            <h3 style="margin-top: 1rem; font-family: var(--font-header);">No se encontraron noticias</h3>
+            <p style="color: var(--text-muted); margin-top: 0.5rem;">Intenta con otra búsqueda o selecciona una categoría diferente.</p>
+            {% if query or category %}
+                <a href="{{ url_for('index') }}" class="btn-primary btn-sm" style="display:inline-block; margin-top: 1.5rem;">Ver Todos los Artículos</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

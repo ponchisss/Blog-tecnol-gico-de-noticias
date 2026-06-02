@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ article.title }} - TECHLOG{% endblock %}
+{% block description %}{{ article.summary }}{% endblock %}
+
+{% block content %}
+<div class="back-btn-container" id="back-btn-wrapper">
+    <a href="{{ url_for('index') }}" class="btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 0.5rem;" id="back-to-home-btn">
+        <span>←</span> Volver al inicio
+    </a>
+</div>
+
+<article class="article-detail" id="article-detail-view">
+    <div class="detail-img-wrapper">
+        <img src="{{ article.image_url }}" alt="{{ article.title }}" class="detail-img">
+    </div>
+    
+    <header class="detail-header" id="detail-header-block">
+        <div class="detail-meta">
+            <span class="meta-item"><span style="color:var(--accent-teal)">📂</span> {{ article.category }}</span>
+            <span class="meta-item"><span>📅</span> {{ article.created_at[:16] }}</span>
+            <span class="meta-item"><span>👤</span> Por {{ article.author_email }}</span>
+        </div>
+        <h1 class="detail-title" id="article-detail-title">{{ article.title }}</h1>
+    </header>
+
+    <div class="detail-body" id="article-detail-content">
+        <!-- Render article content with simple markdown styling supported dynamically -->
+        {{ article.content | safe }}
+    </div>
+</article>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // A quick browser script to translate raw markup (like newlines or headers) if they are stored as plain text.
+    document.addEventListener('DOMContentLoaded', () => {
+        const bodyDiv = document.getElementById('article-detail-content');
+        if (bodyDiv) {
+            let html = bodyDiv.innerHTML;
+            
+            // If the content is stored in markdown, translate it on client-side for dynamic rich render
+            // (Standard Jinja safe render might escape it or preserve newlines)
+            if (!html.includes('<p>') && !html.includes('<br>')) {
+                html = html
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                    .replace(/##\s*([^\n<]+)/g, '<h2>$1</h2>')
+                    .replace(/#\s*([^\n<]+)/g, '<h1>$1</h1>')
+                    .replace(/>\s*([^\n<]+)/g, '<blockquote>$1</blockquote>')
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#a78bfa;text-decoration:underline;">$1</a>');
+                
+                bodyDiv.innerHTML = html;
+            }
+        }
+    });
+</script>
+{% endblock %}
