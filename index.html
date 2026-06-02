@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - TECHLOG Blog Tecnológico</title>
+    <!-- SEO Optimization Meta Tags -->
+    <meta name="description" content="Sitio web de noticias tecnológicas automatizado con panel de administración inteligente, roles dinámicos y editor visual interactivo.">
+    <meta name="keywords" content="Tecnología, IA, Software, Hardware, Ciberseguridad, Noticias, Blog">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom Theme Stylesheet -->
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <!-- Navbar Header -->
+    <nav class="navbar" id="nav-header">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo" id="nav-logo-link">TECHLOG</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link active" id="nav-home">Noticias</a></li>
+                <li id="nav-admin-li" style="display: none;"><a href="admin.html" class="nav-link" id="nav-admin">Panel Admin</a></li>
+            </ul>
+            <div class="nav-auth-actions" id="nav-auth-container">
+                <!-- Will be populated dynamically by JS -->
+                <div style="display: flex; gap: 1rem;">
+                    <a href="login.html" class="btn-outline nav-btn" id="nav-login-btn">Iniciar Sesión</a>
+                    <a href="register.html" class="btn-primary nav-btn" id="nav-register-btn">Registrarse</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="container" id="main-content-body">
+        <!-- Hero Header Section -->
+        <header class="hero-section" id="blog-hero">
+            <h1 class="hero-title" id="blog-main-heading">Descubre el Futuro de la Tecnología</h1>
+            <p class="hero-subtitle" id="blog-main-desc">Artículos de calidad, análisis profundos y las últimas novedades de la Inteligencia Artificial, Ciberseguridad, Desarrollo de Software y Hardware.</p>
+            
+            <!-- Search Interface -->
+            <div class="search-container" id="search-form-div">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-box" placeholder="Buscar noticias tecnológicas..." class="search-input">
+            </div>
+
+            <!-- Categories Navigation Bar -->
+            <div class="categories-bar" id="category-filter-bar">
+                <button class="category-chip active" data-category="">Todos</button>
+                <button class="category-chip" data-category="IA">Inteligencia Artificial</button>
+                <button class="category-chip" data-category="Software">Software</button>
+                <button class="category-chip" data-category="Hardware">Hardware</button>
+                <button class="category-chip" data-category="Ciberseguridad">Ciberseguridad</button>
+            </div>
+        </header>
+
+        <!-- News Articles Grid -->
+        <section class="articles-grid" id="articles-showcase-grid">
+            <!-- Will be populated dynamically by JS -->
+        </section>
+    </main>
+
+    <!-- Toast Container for Animated Alerts -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer-section">
+        <div class="footer-container">
+            <p>&copy; 2026 TECHLOG - Blog Tecnológico. Creado con Antigravity IDE & Gemini.</p>
+            <ul class="footer-links" id="footer-nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li id="footer-login-li"><a href="login.html">Acceso Admin</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript Assets -->
+    <script src="static/js/main.js"></script>
+</body>
+</html>

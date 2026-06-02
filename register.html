@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse - TECHLOG</title>
+    <!-- SEO Optimization Meta Tags -->
+    <meta name="description" content="Crear cuenta en TECHLOG.">
+    <meta name="keywords" content="Tecnología, IA, Software, Hardware, Ciberseguridad, Noticias, Blog">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom Theme Stylesheet -->
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <!-- Navbar Header -->
+    <nav class="navbar" id="nav-header">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo" id="nav-logo-link">TECHLOG</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link" id="nav-home">Noticias</a></li>
+                <li id="nav-admin-li" style="display: none;"><a href="admin.html" class="nav-link" id="nav-admin">Panel Admin</a></li>
+            </ul>
+            <div class="nav-auth-actions" id="nav-auth-container">
+                <div style="display: flex; gap: 1rem;">
+                    <a href="login.html" class="btn-outline nav-btn" id="nav-login-btn">Iniciar Sesión</a>
+                    <a href="register.html" class="btn-primary nav-btn active" id="nav-register-btn">Registrarse</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="container" id="main-content-body">
+        <div class="form-card" id="register-form-card">
+            <header class="form-header">
+                <h2 class="form-title" id="register-title">Crear Cuenta</h2>
+                <p class="form-subtitle" id="register-subtitle">Únete al blog tecnológico y recibe noticias exclusivas</p>
+            </header>
+
+            <form id="register-submit-form">
+                <div class="form-group">
+                    <label for="email" class="form-label">Correo Electrónico</label>
+                    <input type="email" id="email" class="form-control" placeholder="nombre@correo.com" required autocomplete="email">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" id="password" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 0.8rem; border-radius: 8px; font-weight: 700; cursor: pointer; border:none;" id="register-btn-submit">Registrarse</button>
+            </form>
+
+            <footer class="form-footer" id="register-footer">
+                <p>¿Ya tienes una cuenta? <a href="login.html" id="go-to-login">Inicia sesión</a></p>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1.5rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:1rem;">
+                    * Se requiere verificación por código de seguridad enviado por email (simulado en el panel/buzón o real por Gmail).
+                </p>
+            </footer>
+        </div>
+    </main>
+
+    <!-- Toast Container for Animated Alerts -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer-section">
+        <div class="footer-container">
+            <p>&copy; 2026 TECHLOG - Blog Tecnológico. Creado con Antigravity IDE & Gemini.</p>
+            <ul class="footer-links" id="footer-nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li id="footer-login-li"><a href="login.html">Acceso Admin</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript Assets -->
+    <script src="static/js/main.js"></script>
+</body>
+</html>

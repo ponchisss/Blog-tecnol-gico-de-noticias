@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - TECHLOG</title>
+    <!-- SEO Optimization Meta Tags -->
+    <meta name="description" content="Panel de administración de TECHLOG.">
+    <meta name="keywords" content="Tecnología, IA, Software, Hardware, Ciberseguridad, Noticias, Blog">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom Theme Stylesheet -->
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <!-- Navbar Header -->
+    <nav class="navbar" id="nav-header">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo" id="nav-logo-link">TECHLOG</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link" id="nav-home">Noticias</a></li>
+                <li><a href="admin.html" class="nav-link active" id="nav-admin">Panel Admin</a></li>
+            </ul>
+            <div class="nav-auth-actions" id="nav-auth-container">
+                <div class="user-badge" id="nav-user-badge">
+                    <span id="nav-user-email">admin@techblog.com</span>
+                    <span class="user-role role-admin" id="nav-user-role-lbl">Admin</span>
+                    <button class="btn-outline btn-sm" style="border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" id="nav-logout-btn">Salir</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="container" id="main-content-body">
+        <div class="admin-layout" id="admin-panel-grid">
+            <!-- Sidebar navigation -->
+            <aside class="admin-sidebar" id="admin-sidebar-menu">
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item active" data-pane="pane-articles" id="tab-articles">
+                        <button>📰 Noticias</button>
+                    </li>
+                    <li class="sidebar-item" data-pane="pane-write" id="tab-write">
+                        <button>✍️ Redactar</button>
+                    </li>
+                    <li class="sidebar-item" data-pane="pane-roles" id="tab-roles" style="display: none;">
+                        <button>👥 Roles de Usuarios</button>
+                    </li>
+                    <li class="sidebar-item" data-pane="pane-mailbox" id="tab-mailbox">
+                        <button>📬 Buzón Virtual</button>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Main administrative area -->
+            <main class="admin-main" id="admin-panes-container">
+                
+                <!-- PANE 1: Articles list -->
+                <section class="admin-pane active" id="pane-articles">
+                    <div class="pane-header">
+                        <h2 class="pane-title">Gestionar Noticias</h2>
+                        <button class="btn-primary btn-sm" onclick="document.getElementById('tab-write').click();" id="new-article-shortcut-btn">+ Nueva Noticia</button>
+                    </div>
+                    
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table" id="articles-admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Imagen</th>
+                                    <th>Título</th>
+                                    <th>Categoría</th>
+                                    <th>Autor</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-articles-tbody">
+                                <!-- Will be populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PANE 2: Write / Edit Article -->
+                <section class="admin-pane" id="pane-write">
+                    <div class="pane-header">
+                        <h2 class="pane-title" id="editor-pane-title">Redactar Nueva Noticia</h2>
+                    </div>
+                    
+                    <form id="article-form">
+                        <div class="form-group">
+                            <label for="article-title" class="form-label">Título del Artículo</label>
+                            <input type="text" id="article-title" class="form-control" placeholder="Ej. El impacto de GPT-5 en la industria del software" required>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="article-category" class="form-label">Categoría</label>
+                                <select id="article-category" class="form-control" style="background-image: none;" required>
+                                    <option value="IA">Inteligencia Artificial (IA)</option>
+                                    <option value="Software">Software & Desarrollo</option>
+                                    <option value="Hardware">Hardware & Gadgets</option>
+                                    <option value="Ciberseguridad">Ciberseguridad</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="article-image-url" class="form-label">URL de la Imagen (Opcional)</label>
+                                <input type="url" id="article-image-url" class="form-control" placeholder="https://images.unsplash.com/...">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="article-summary" class="form-label">Resumen Ejecutivo</label>
+                            <textarea id="article-summary" class="form-control" rows="2" placeholder="Breve resumen de una línea que enganche al lector en la grilla..." required></textarea>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <label for="editor-content" class="form-label">Contenido de la Noticia</label>
+                            <div class="wysiwyg-editor">
+                                <div class="editor-toolbar" id="editor-toolbar-actions">
+                                    <button type="button" class="toolbar-btn" data-action="bold" title="Negrita">Negrita (B)</button>
+                                    <button type="button" class="toolbar-btn" data-action="italic" title="Cursiva">Cursiva (I)</button>
+                                    <button type="button" class="toolbar-btn" data-action="h2" title="Título H2">Subtítulo (H2)</button>
+                                    <button type="button" class="toolbar-btn" data-action="link" title="Enlace">Enlace</button>
+                                    <button type="button" class="toolbar-btn" data-action="quote" title="Cita bloque">Cita</button>
+                                    <button type="button" class="toolbar-btn" data-action="image" title="Imagen">Imagen URL</button>
+                                </div>
+                                <textarea id="editor-content" class="editor-textarea" placeholder="Escribe el cuerpo de tu noticia. Soporta formato básico de markdown..." required></textarea>
+                            </div>
+                            
+                            <label class="form-label">Previsualización en tiempo real</label>
+                            <div class="editor-preview" id="editor-preview-container">
+                                <div id="editor-preview-content" class="detail-body" style="padding: 0;">
+                                    <p style="color:#64748b;font-style:italic;">La previsualización en tiempo real aparecerá aquí...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                            <button type="button" class="btn-outline" onclick="document.getElementById('tab-articles').click();" id="editor-cancel-btn">Cancelar</button>
+                            <button type="submit" class="btn-primary" id="editor-submit-btn">Publicar Artículo</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- PANE 3: Roles management -->
+                <section class="admin-pane" id="pane-roles">
+                    <div class="pane-header">
+                        <h2 class="pane-title">Gestión de Roles y Accesos</h2>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        Como Administrador principal, puedes ascender o descender a cualquier usuario registrado. Los <strong>Editores</strong> pueden escribir y editar noticias, los <strong>Administradores</strong> tienen control total y los <strong>Lectores</strong> solo leen el blog.
+                    </p>
+                    
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table" id="users-admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Email</th>
+                                    <th>Rol Asignado</th>
+                                    <th>Verificado</th>
+                                    <th>Fecha Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-tbody">
+                                <!-- Will be populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PANE 4: Simulated Inbox -->
+                <section class="admin-pane" id="pane-mailbox">
+                    <div class="pane-header">
+                        <h2 class="pane-title">Buzón de Gmail Virtual (Desarrollo)</h2>
+                        <button class="btn-outline btn-sm" id="mailbox-refresh-btn">🔄 Actualizar</button>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        Este buzón simula los correos enviados por la aplicación. Cuando creas una nueva cuenta para un usuario, el código de verificación de 6 dígitos se registrará aquí para que puedas copiarlo y verificar tu cuenta de pruebas inmediatamente.
+                    </p>
+                    
+                    <div class="mailbox-list" id="mailbox-list-container">
+                        <!-- Mock emails are populated here by javascript -->
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </main>
+
+    <!-- Toast Container for Animated Alerts -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer-section">
+        <div class="footer-container">
+            <p>&copy; 2026 TECHLOG - Blog Tecnológico. Creado con Antigravity IDE & Gemini.</p>
+            <ul class="footer-links" id="footer-nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li id="footer-login-li"><a href="login.html">Acceso Admin</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript Assets -->
+    <script src="static/js/main.js"></script>
+</body>
+</html>

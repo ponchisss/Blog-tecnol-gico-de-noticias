@@ -70,22 +70,27 @@ graph TD
 
 ---
 
-## 💻 Stack Tecnológico
+## 💻 Stack Tecnológico & Arquitectura Estática (GitHub Pages)
 
-La aplicación ha sido desarrollada utilizando tecnologías ligeras de alto impacto y rendimiento para garantizar velocidad extrema y compatibilidad absoluta en cualquier entorno local.
+La aplicación soporta **dos modos de ejecución** para garantizar la máxima portabilidad:
 
-*   **Backend**: 
-    *   **Python 3.13**: Lenguaje principal de alto nivel.
-    *   **Flask 3.1.3**: Micro-framework web altamente flexible y veloz.
-    *   **python-dotenv**: Gestión segura de variables de entorno y credenciales.
-*   **Base de Datos**:
-    *   **SQLite 3**: Base de datos relacional integrada en Python, ligera y de cero configuración externa.
+1. **Modo Estático / Servidor Cliente (Recomendado para GitHub Pages)**:
+   * **Ubicación**: En la raíz del repositorio (`index.html`, `admin.html`, etc.).
+   * **Persistencia**: Se gestiona una base de datos local simulada en el navegador usando `localStorage`.
+   * **Despliegue**: Totalmente compatible con **GitHub Pages**. Al estar el archivo `index.html` en la raíz del repositorio, GitHub Pages lo cargará de forma automática como página de inicio principal sin requerir configuración adicional de servidores.
+
+2. **Modo Dinámico / Servidor Flask (Python + SQLite)**:
+   * **Ubicación**: Lógica de servidor en `app.py` y plantillas Jinja2 en `templates/`.
+   * **Base de Datos**: SQLite (`blog.db`) local.
+   * **Despliegue**: Diseñado para plataformas que admiten ejecución de scripts en backend (como Heroku, Render o servidores VPS).
+
 *   **Frontend**:
     *   **HTML5 Semántico**: Estructura de marcado moderna optimizada para accesibilidad y SEO.
     *   **Vanilla CSS**: Hoja de estilos premium hecha a mano utilizando variables de diseño, estética oscura neon con efectos *Glassmorphism* (`backdrop-filter`) y micro-animaciones en tarjetas y botones.
-    *   **JavaScript Nativo (ES6)**: Control reactivo de vistas, peticiones AJAX (`fetch`), lógica de inserción de estilos en el editor visual e integración asíncrona.
+    *   **JavaScript Nativo (ES6)**: Control reactivo de vistas, operaciones de almacenamiento en `localStorage`, e integración dinámica de vistas y markdown.
 *   **Control del Repositorio**:
-    *   **Git REST API**: Script en Python para la sincronización remota e integración con GitHub a través del token personal en entornos sin Git CLI instalado.
+    *   **Git REST API**: Script en Python (`git_push.py`) para la sincronización remota e integración con GitHub a través del token personal en entornos sin Git CLI instalado.
+
 
 ---
 
