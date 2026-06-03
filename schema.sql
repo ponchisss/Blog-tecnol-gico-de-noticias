@@ -62,6 +62,22 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+-- 5b. Prevent demoting the main admin email 'dariponcee@gmail.com'
+CREATE OR REPLACE FUNCTION public.prevent_owner_demotion()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF OLD.email = 'dariponcee@gmail.com' AND NEW.role <> 'Admin' THEN
+    RAISE EXCEPTION 'No se puede cambiar el rol del administrador principal.';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER on_user_role_update
+  BEFORE UPDATE OF role ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.prevent_owner_demotion();
+
+
 -- 6. Insert default admin user into auth.users (password: AdminPass123!)
 -- Enable pgcrypto extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS pgcrypto;

@@ -731,7 +731,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <td style="font-size: 0.75rem; font-family: monospace;">${u.id.substring(0, 8)}...</td>
                         <td style="font-weight: 700;">${u.email}</td>
                         <td>
-                            <select class="role-select" data-user-id="${u.id}" id="role-select-${u.id}">
+                            <select class="role-select" data-user-id="${u.id}" id="role-select-${u.id}" ${u.email === 'dariponcee@gmail.com' ? 'disabled' : ''}>
                                 <option value="Reader" ${u.role === 'Reader' ? 'selected' : ''}>Reader (Lector)</option>
                                 <option value="Editor" ${u.role === 'Editor' ? 'selected' : ''}>Editor (Escritor)</option>
                                 <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin (Administrador)</option>
@@ -750,6 +750,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     select.addEventListener('change', async () => {
                         const userId = select.getAttribute('data-user-id');
                         const newRole = select.value;
+                        
+                        const targetUser = users.find(u => u.id === userId);
+                        if (targetUser && targetUser.email === 'dariponcee@gmail.com') {
+                            showToast("No puedes cambiar el rol del administrador principal por seguridad.", "error");
+                            await renderAdminUsers();
+                            return;
+                        }
                         
                         if (userId === currentUser.id) {
                             showToast("No puedes cambiar tu propio rol por seguridad.", "error");
@@ -784,29 +791,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-        // Settings Form (Optional configurations for EmailJS)
-        const settingsForm = document.getElementById('settings-emailjs-form');
-        if (settingsForm) {
-            const enabledInput = document.getElementById('settings-emailjs-enabled');
-            const serviceInput = document.getElementById('settings-emailjs-service');
-            const templateInput = document.getElementById('settings-emailjs-template');
-            const publicKeyInput = document.getElementById('settings-emailjs-publickey');
 
-            enabledInput.checked = safeStorage.getItem('techlog_emailjs_enabled') === 'true';
-            serviceInput.value = safeStorage.getItem('techlog_emailjs_service') || "";
-            templateInput.value = safeStorage.getItem('techlog_emailjs_template') || "";
-            publicKeyInput.value = safeStorage.getItem('techlog_emailjs_publickey') || "";
-
-            settingsForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                safeStorage.setItem('techlog_emailjs_enabled', enabledInput.checked);
-                safeStorage.setItem('techlog_emailjs_service', serviceInput.value.trim());
-                safeStorage.setItem('techlog_emailjs_template', templateInput.value.trim());
-                safeStorage.setItem('techlog_emailjs_publickey', publicKeyInput.value.trim());
-
-                showToast("Configuración opcional de EmailJS guardada.", "success");
-            });
-        }
 
         // CRUD article submit
         const articleForm = document.getElementById('article-form');
