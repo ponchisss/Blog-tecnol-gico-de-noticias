@@ -1054,3 +1054,35 @@ a {
         font-size: 1.8rem;
     }
 }
+
+/* Premium Edit/Cancel Buttons in Admin Editor */
+#editor-cancel-btn {
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    color: var(--accent-pink);
+    background: rgba(244, 63, 94, 0.05);
+    border-radius: 8px;
+    padding: 0.7rem 1.8rem;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+}
+#editor-cancel-btn:hover {
+    background: rgba(244, 63, 94, 0.15);
+    border-color: var(--accent-pink);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+}
+
+#editor-submit-btn {
+    background: linear-gradient(135deg, var(--primary), var(--accent-teal));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1.8rem;
+    font-weight: 700;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+#editor-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4), 0 0 15px rgba(139, 92, 246, 0.3);
+}

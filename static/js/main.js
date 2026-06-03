@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             const { data: dbArticles, error } = await _supabase
                 .from('articles')
-                .select('*, users(email)');
+                .select('*, users(email, nickname)');
 
             if (error) {
                 articlesShowcaseGrid.innerHTML = `<div class="no-results" style="grid-column: 1 / -1;"><span style="font-size: 3rem;">❌</span><h3>Error al conectar con Supabase</h3><p>${error.message}</p></div>`;
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const articles = dbArticles.map(art => ({
                 ...art,
-                author_email: art.users ? art.users.email : 'desconocido'
+                author_name: art.users ? (art.users.nickname || art.users.email.split('@')[0]) : 'desconocido'
             }));
 
             // Filter
@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <h3 class="card-title">${art.title}</h3>
                             <p class="card-summary">${art.summary}</p>
                             <div class="card-footer">
-                                <span class="card-author">${art.author_email.split('@')[0]}</span>
+                                <span class="card-author">${art.author_name}</span>
                                 <a href="article.html?id=${art.id}" class="card-more" id="read-more-${art.id}">Leer más</a>
                             </div>
                         </div>
@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const loadArticle = async () => {
                 const { data: article, error } = await _supabase
                     .from('articles')
-                    .select('*, users(email)')
+                    .select('*, users(email, nickname)')
                     .eq('id', articleId)
                     .maybeSingle();
 
@@ -440,7 +440,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('detail-image').alt = article.title;
                 document.getElementById('detail-category').textContent = article.category;
                 document.getElementById('detail-date').textContent = article.created_at.substring(0, 16).replace('T', ' ');
-                document.getElementById('detail-author').textContent = `Por ${article.users ? article.users.email : 'desconocido'}`;
+                const authorDisplay = article.users ? (article.users.nickname || article.users.email.split('@')[0]) : 'desconocido';
+                document.getElementById('detail-author').textContent = `Por ${authorDisplay}`;
                 document.getElementById('article-detail-title').textContent = article.title;
                 
                 const contentBody = document.getElementById('article-detail-content');
@@ -659,7 +660,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const { data: dbArticles, error } = await _supabase
                 .from('articles')
-                .select('*, users(email)');
+                .select('*, users(email, nickname)');
 
             if (error) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-pink); padding: 3rem 0;">❌ Error al conectar con Supabase: ${error.message}</td></tr>`;
@@ -668,7 +669,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const articles = dbArticles.map(art => ({
                 ...art,
-                author_email: art.users ? art.users.email : 'desconocido'
+                author_name: art.users ? (art.users.nickname || art.users.email.split('@')[0]) : 'desconocido'
             }));
 
             articles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -686,7 +687,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <td>
                             <span class="user-role role-reader" style="font-size: 0.75rem;">${art.category}</span>
                         </td>
-                        <td>${art.author_email.split('@')[0]}</td>
+                        <td>${art.author_name}</td>
                         <td>${art.created_at.substring(0, 10)}</td>
                         <td>
                             <div class="action-btns">

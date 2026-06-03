@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - TECHLOG</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <!-- SEO Optimization Meta Tags -->
     <meta name="description" content="Panel de administración de TECHLOG.">
     <meta name="keywords" content="Tecnología, IA, Software, Hardware, Ciberseguridad, Noticias, Blog">
@@ -21,11 +22,11 @@
             <a href="index.html" class="nav-logo" id="nav-logo-link">TECHLOG</a>
             <ul class="nav-links">
                 <li><a href="index.html" class="nav-link" id="nav-home">Noticias</a></li>
-                <li><a href="admin.html" class="nav-link active" id="nav-admin">Panel Admin</a></li>
+                <li><a href="admin.html" class="nav-link active" id="nav-admin">Panel</a></li>
             </ul>
             <div class="nav-auth-actions" id="nav-auth-container">
                 <div class="user-badge" id="nav-user-badge">
-                    <span id="nav-user-email">admin@techblog.com</span>
+                    <span id="nav-user-email">Cargando...</span>
                     <span class="user-role role-admin" id="nav-user-role-lbl">Admin</span>
                     <button class="btn-outline btn-sm" style="border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" id="nav-logout-btn">Salir</button>
                 </div>
@@ -112,7 +113,7 @@
 
                         <div class="form-group">
                             <label for="article-summary" class="form-label">Resumen Ejecutivo</label>
-                            <textarea id="article-summary" class="form-control" rows="2" placeholder="Breve resumen de una línea que enganche al lector en la grilla..." required></textarea>
+                            <textarea id="article-summary" class="form-control" rows="2" placeholder="Breve resumen de una línea que enganche al lector en la grilla..." required style="resize: none; height: 75px;"></textarea>
                         </div>
 
                         <div class="form-group" style="margin-bottom: 2rem;">
