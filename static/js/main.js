@@ -1,101 +1,94 @@
 /*
    =========================================
-   FRONTEND JAVASCRIPT: LOCAL STORAGE STORE & CONTROLS
+   FRONTEND JAVASCRIPT: SUPABASE CLIENT INTEGRATION WITH SAFESTORAGE
    Author: Antigravity IDE Agent
    =========================================
 */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // --- DATABASE BOOTSTRAPPING & SEED DATA ---
-    
-    // Default seed articles
-    const defaultArticles = [
-        {
-            id: 1,
-            title: "El impacto de GPT-5 en la industria del software",
-            summary: "Analizamos cómo el próximo modelo lingüístico de OpenAI promete redefinir el rol de los ingenieros de software y la automatización de código.",
-            category: "IA",
-            content: "## Introducción\n\nEl desarrollo de la Inteligencia Artificial está avanzando a pasos agigantados. Con la inminente llegada de GPT-5, el ecosistema del desarrollo de software se encuentra al borde de una transformación sin precedentes.\n\n## ¿Qué podemos esperar?\n\n* **Generación de código multi-archivo**: Capacidad de diseñar arquitecturas completas desde un prompt.\n* **Razonamiento avanzado**: Menos alucinaciones y mayor comprensión del contexto del negocio.\n* **Agentes autónomos**: Sistemas capaces de depurar, probar y desplegar software sin intervención humana constante.\n\n> \"La IA no reemplazará a los programadores, pero los programadores que usan IA reemplazarán a los que no la usan.\"\n\n## Conclusión\n\nAdaptarse a estas nuevas herramientas es fundamental para seguir siendo relevantes en una industria hiper-competitiva.",
-            image_url: "https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=600&auto=format&fit=crop",
-            author_id: 100,
-            author_email: "admin@techblog.com",
-            created_at: new Date(Date.now() - 3600000 * 24).toISOString() // 1 day ago
+document.addEventListener('DOMContentLoaded', async () => {
+    // --- SAFESTORAGE WRAPPER FOR FILE:// COMPATIBILITY ---
+    const memoryStorage = {};
+    const safeStorage = {
+        getItem: (key) => {
+            try {
+                return localStorage.getItem(key);
+            } catch (e) {
+                return memoryStorage[key] || null;
+            }
         },
-        {
-            id: 2,
-            title: "Por qué Rust es el futuro del desarrollo de sistemas",
-            summary: "Un repaso profundo de la seguridad de memoria, rendimiento crudo y concurrencia sin miedos que ofrece el lenguaje favorito de los desarrolladores.",
-            category: "Software",
-            content: "## Seguridad sin Recolector de Basura\n\nRust ha ganado popularidad gracias a su enfoque innovador en la gestión de memoria. A diferencia de lenguajes como Java o Go, Rust no tiene un recolector de basura (garbage collector). En su lugar, utiliza un sistema de **propiedad (ownership)** y préstamo de variables que el compilador valida en tiempo de compilación.\n\n## Ventajas Clave:\n\n1. **Rendimiento crudo**: Equivalente a C y C++.\n2. **Seguridad de memoria garantizada**: Previene errores comunes como desbordamientos de buffer o referencias nulas.\n3. **Excelente soporte para concurrencia**: Elimina las condiciones de carrera de datos.\n\n## Conclusión\n\nGrandes tecnológicas como Microsoft, Google y AWS están reescribiendo componentes críticos de su infraestructura en Rust. Es hora de prestarle atención.",
-            image_url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop",
-            author_id: 100,
-            author_email: "admin@techblog.com",
-            created_at: new Date(Date.now() - 3600000 * 48).toISOString() // 2 days ago
+        setItem: (key, value) => {
+            try {
+                localStorage.setItem(key, value);
+            } catch (e) {
+                memoryStorage[key] = String(value);
+            }
         },
-        {
-            id: 3,
-            title: "La revolución de los procesadores cuánticos",
-            summary: "Exploramos los hitos más recientes en computación cuántica y cómo amenazan la criptografía moderna en el corto plazo.",
-            category: "Hardware",
-            content: "## La carrera por los Qubits\n\nLa computación tradicional se basa en bits (0 o 1). La computación cuántica, en cambio, utiliza qubits que aprovechan los principios de superposición y entrelazamiento. Esto permite procesar volúmenes masivos de información de forma paralela.\n\n## Desafíos actuales:\n\n* **Decoherencia cuántica**: Mantener los qubits estables requiere temperaturas cercanas al cero absoluto (-273°C).\n* **Corrección de errores**: Se necesitan miles de qubits físicos para crear un solo qubit lógico corregido.\n\n## Impacto en la Criptografía\n\nLos algoritmos cuánticos como el de Shor son capaces de romper los sistemas criptográficos de clave pública más comunes (RSA y ECC). La transición hacia la **criptografía post-cuántica** ya ha comenzado.",
-            image_url: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop",
-            author_id: 100,
-            author_email: "admin@techblog.com",
-            created_at: new Date(Date.now() - 3600000 * 72).toISOString() // 3 days ago
-        },
-        {
-            id: 4,
-            title: "Cómo proteger tus aplicaciones contra inyecciones SQL",
-            summary: "Guía práctica con ejemplos reales para blindar tus bases de datos contra una de las vulnerabilidades más antiguas y destructivas de la web.",
-            category: "Ciberseguridad",
-            content: "## ¿Qué es la Inyección SQL?\n\nLa inyección SQL (SQLi) ocurre cuando un atacante logra insertar código SQL malicioso dentro de una consulta realizada por la aplicación a la base de datos. Esto puede resultar en la filtración de contraseñas, robo de datos o incluso destrucción de la base de datos.\n\n## Medidas preventivas:\n\n1. **Usar siempre Parametrización**: Nunca concatenar strings en queries.\n2. **Validación de entradas**: Filtrar caracteres sospechosos.\n3. **Principio de menor privilegio**: Que la conexión de la app solo tenga los permisos estrictamente necesarios.",
-            image_url: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&auto=format&fit=crop",
-            author_id: 100,
-            author_email: "admin@techblog.com",
-            created_at: new Date(Date.now() - 3600000 * 96).toISOString() // 4 days ago
+        removeItem: (key) => {
+            try {
+                localStorage.removeItem(key);
+            } catch (e) {
+                delete memoryStorage[key];
+            }
         }
-    ];
+    };
 
-    // Default seed users
-    const defaultUsers = [
-        {
-            id: 100,
-            email: "admin@techblog.com",
-            password: "AdminPass123!",
-            role: "Admin",
-            is_verified: true,
-            verification_code: null,
-            nickname: "Administrador",
-            fullname: "Administrador TECHLOG",
-            phone: "+34 600 000 000",
-            photo_url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop",
-            bio: "Cuenta de administrador principal de TECHLOG. Encargado de la gestión de roles y noticias.",
-            created_at: new Date().toISOString()
+    // --- SUPABASE CLIENT INITIALIZATION ---
+    const SUPABASE_URL = "https://mohqmwtvxarvuukfeyan.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_Qshjrg4XARQ0W8v8U11r7A_GMZSzDF7";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+            storage: safeStorage,
+            persistSession: true,
+            autoRefreshToken: true
         }
-    ];
+    });
 
-    // Helper functions to get/set local state
-    const getArticles = () => JSON.parse(localStorage.getItem('techlog_articles')) || [];
-    const setArticles = (articles) => localStorage.setItem('techlog_articles', JSON.stringify(articles));
-    
-    const getUsers = () => JSON.parse(localStorage.getItem('techlog_users')) || [];
-    const setUsers = (users) => localStorage.setItem('techlog_users', JSON.stringify(users));
+    // --- LOCAL SESSION CACHE HELPERS ---
+    const getCurrentUser = () => JSON.parse(safeStorage.getItem('techlog_current_user')) || null;
+    const setCurrentUser = (user) => safeStorage.setItem('techlog_current_user', JSON.stringify(user));
 
-    const getCurrentUser = () => JSON.parse(localStorage.getItem('techlog_current_user')) || null;
-    const setCurrentUser = (user) => localStorage.setItem('techlog_current_user', JSON.stringify(user));
+    // --- SYNCHRONIZE ACTIVE SESSION WITH SUPABASE ---
+    async function syncSession() {
+        try {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session && session.user) {
+                const { data: profile, error } = await _supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .maybeSingle();
 
-    const getMockEmails = () => JSON.parse(localStorage.getItem('techlog_mock_emails')) || [];
-    const setMockEmails = (emails) => localStorage.setItem('techlog_mock_emails', JSON.stringify(emails));
-
-    // Bootstrap data if empty
-    if (!localStorage.getItem('techlog_articles')) {
-        setArticles(defaultArticles);
-    }
-    if (!localStorage.getItem('techlog_users')) {
-        setUsers(defaultUsers);
+                if (profile) {
+                    setCurrentUser({
+                        id: profile.id,
+                        email: profile.email,
+                        role: profile.role,
+                        is_verified: true,
+                        nickname: profile.nickname || profile.email.split('@')[0],
+                        photo_url: profile.photo_url || null
+                    });
+                } else {
+                    // Trigger fallback if public profile not inserted yet
+                    setCurrentUser({
+                        id: session.user.id,
+                        email: session.user.email,
+                        role: 'Reader',
+                        is_verified: true,
+                        nickname: session.user.email.split('@')[0],
+                        photo_url: null
+                    });
+                }
+            } else {
+                safeStorage.removeItem('techlog_current_user');
+            }
+        } catch (err) {
+            console.error("Error synchronizing session:", err);
+            safeStorage.removeItem('techlog_current_user');
+        }
+        updateNavbar();
     }
 
-    // --- TOAST NOTIFICATIONS HELPER ---
+    // --- TOAST NOTIFICATIONS SYSTEM ---
     window.showToast = function(message, type = 'success') {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -119,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     };
 
-    // --- DYNAMIC NAVBAR & SESSION CONTROLS ---
+    // --- DYNAMIC NAVBAR LOGIC ---
     function updateNavbar() {
         const currentUser = getCurrentUser();
         const navAuthContainer = document.getElementById('nav-auth-container');
@@ -127,14 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const footerLoginLi = document.getElementById('footer-login-li');
 
         if (currentUser) {
-            // Find current user's profile details in database
-            const users = getUsers();
-            const dbUser = users.find(u => u.id === currentUser.id) || currentUser;
-
-            // Update auth actions in navbar to show nickname and circular avatar
             if (navAuthContainer) {
-                const displayName = dbUser.nickname || dbUser.email.split('@')[0];
-                const avatarUrl = dbUser.photo_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+                const displayName = currentUser.nickname || currentUser.email.split('@')[0];
+                const avatarUrl = currentUser.photo_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
                 
                 navAuthContainer.innerHTML = `
                     <div class="user-badge" id="nav-user-badge" style="display: flex; align-items: center; gap: 0.75rem;">
@@ -142,31 +130,27 @@ document.addEventListener('DOMContentLoaded', () => {
                             <img src="${avatarUrl}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--accent-purple); background: rgba(255,255,255,0.05);">
                             <span style="font-weight: 600; color: #fff; font-size: 0.9rem;">${displayName}</span>
                         </a>
-                        <span class="user-role role-${dbUser.role.toLowerCase()}" id="nav-user-role-lbl">${dbUser.role}</span>
+                        <span class="user-role role-${currentUser.role.toLowerCase()}" id="nav-user-role-lbl">${currentUser.role}</span>
                         <button class="btn-outline btn-sm" style="border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" id="nav-logout-btn">Salir</button>
                     </div>
                 `;
                 
-                // Add event listener to dynamically created logout button
                 document.getElementById('nav-logout-btn').addEventListener('click', handleLogout);
             }
 
-            // Show Admin Panel link if Role is Admin or Editor
             if (navAdminLi) {
-                if (dbUser.role === 'Admin' || dbUser.role === 'Editor') {
+                if (currentUser.role === 'Admin' || currentUser.role === 'Editor') {
                     navAdminLi.style.display = 'block';
                 } else {
                     navAdminLi.style.display = 'none';
                 }
             }
 
-            // Update footer link to cerrar sesión
             if (footerLoginLi) {
                 footerLoginLi.innerHTML = `<button id="footer-logout-btn" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer;">Cerrar Sesión</button>`;
                 document.getElementById('footer-logout-btn').addEventListener('click', handleLogout);
             }
         } else {
-            // Reset navbar for guests
             if (navAuthContainer) {
                 navAuthContainer.innerHTML = `
                     <div style="display: flex; gap: 1rem;">
@@ -184,16 +168,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function handleLogout() {
-        localStorage.removeItem('techlog_current_user');
+    async function handleLogout() {
+        const { error } = await _supabase.auth.signOut();
+        if (error) {
+            showToast(`Error al cerrar sesión: ${error.message}`, "error");
+            return;
+        }
+        safeStorage.removeItem('techlog_current_user');
         showToast("Sesión cerrada exitosamente.", "success");
         setTimeout(() => {
             window.location.href = "index.html";
         }, 1000);
     }
 
-    // Always run navbar layout refresh
-    updateNavbar();
+    // Run session synchronization on boot
+    await syncSession();
 
     // --- Markdown/HTML Translation helper ---
     function parseMarkdown(text) {
@@ -209,10 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#a78bfa;text-decoration:underline;">$1</a>');
     }
 
-    // --- PASSWORD VISIBILITY TOGGLE ENGINE ---
+    // --- PASSWORD VISIBILITY TOGGLE ---
     const togglePasswordBtn = document.getElementById('toggle-password');
     const passwordInput = document.getElementById('password');
-    
     if (togglePasswordBtn && passwordInput) {
         togglePasswordBtn.addEventListener('click', () => {
             const isPassword = passwordInput.type === 'password';
@@ -221,63 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- EMAILJS INTEGRATION HELPER ---
-    async function sendVerificationEmail(recipientEmail, code) {
-        const enabled = localStorage.getItem('techlog_emailjs_enabled') === 'true';
-        const serviceId = localStorage.getItem('techlog_emailjs_service');
-        const templateId = localStorage.getItem('techlog_emailjs_template');
-        const publicKey = localStorage.getItem('techlog_emailjs_publickey');
-
-        // Always save mock mailbox entry locally so it remains inspectable in dashboard
-        const mockEntry = {
-            to: recipientEmail,
-            code: code,
-            subject: "Verifica tu cuenta - Blog Tecnológico",
-            body: `Tu código de verificación de 6 dígitos es: `,
-            timestamp: new Date().toLocaleTimeString()
-        };
-        const emails = getMockEmails();
-        emails.push(mockEntry);
-        if (emails.length > 10) emails.shift();
-        setMockEmails(emails);
-
-        if (enabled && serviceId && templateId && publicKey) {
-            try {
-                const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        service_id: serviceId,
-                        template_id: templateId,
-                        user_id: publicKey,
-                        template_params: {
-                            to_email: recipientEmail,
-                            code: code
-                        }
-                    })
-                });
-
-                if (response.ok) {
-                    console.log(`[EmailJS] Verification code sent to ${recipientEmail}`);
-                    return true;
-                } else {
-                    const errText = await response.text();
-                    console.error("[EmailJS Error]", errText);
-                    return false;
-                }
-            } catch (err) {
-                console.error("[EmailJS Fetch Error]", err);
-                return false;
-            }
-        }
-        
-        console.log(`[Simulation Mode] Code for ${recipientEmail}: ${code}`);
-        return null; // Simulated
-    }
-
-    // --- PROFILE MANAGEMENT LOGIC ---
+    // --- PROFILE PAGE LOGIC ---
     const profileForm = document.getElementById('profile-submit-form');
     if (profileForm) {
         const currentUser = getCurrentUser();
@@ -286,15 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const users = getUsers();
-        const userIndex = users.findIndex(u => u.id === currentUser.id);
-
-        if (userIndex === -1) {
-            window.location.href = "login.html";
-            return;
-        }
-
-        const user = users[userIndex];
         const emailInput = document.getElementById('profile-email');
         const nicknameInput = document.getElementById('profile-nickname');
         const fullnameInput = document.getElementById('profile-fullname');
@@ -305,16 +228,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const avatarFallback = document.getElementById('profile-avatar-fallback');
         const roleBadge = document.getElementById('profile-role-badge');
 
-        // Populate fields
-        emailInput.value = user.email;
-        nicknameInput.value = user.nickname || user.email.split('@')[0];
-        fullnameInput.value = user.fullname || "";
-        phoneInput.value = user.phone || "";
-        photoUrlInput.value = user.photo_url || "";
-        bioInput.value = user.bio || "";
-        
-        roleBadge.textContent = user.role;
-        roleBadge.className = `user-role role-${user.role.toLowerCase()}`;
+        // Fetch latest profile details from Supabase
+        const loadProfile = async () => {
+            const { data: profile, error } = await _supabase
+                .from('users')
+                .select('*')
+                .eq('id', currentUser.id)
+                .maybeSingle();
+
+            if (error) {
+                showToast("Error al cargar datos del perfil.", "error");
+                return;
+            }
+
+            if (profile) {
+                emailInput.value = profile.email;
+                nicknameInput.value = profile.nickname || profile.email.split('@')[0];
+                fullnameInput.value = profile.fullname || "";
+                phoneInput.value = profile.phone || "";
+                photoUrlInput.value = profile.photo_url || "";
+                bioInput.value = profile.bio || "";
+                
+                roleBadge.textContent = profile.role;
+                roleBadge.className = `user-role role-${profile.role.toLowerCase()}`;
+                updateAvatarPreview(profile.photo_url);
+            }
+        };
 
         // Preview helper
         const updateAvatarPreview = (url) => {
@@ -328,16 +267,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Initialize preview
-        updateAvatarPreview(user.photo_url);
-
-        // Update preview dynamically on typing
         photoUrlInput.addEventListener('input', (e) => {
             updateAvatarPreview(e.target.value.trim());
         });
 
-        // Submit form handler
-        profileForm.addEventListener('submit', (e) => {
+        profileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const nickname = nicknameInput.value.trim();
@@ -351,26 +285,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Save details in local user record
-            users[userIndex].nickname = nickname;
-            users[userIndex].fullname = fullname;
-            users[userIndex].phone = phone;
-            users[userIndex].photo_url = photoUrl;
-            users[userIndex].bio = bio;
-            setUsers(users);
+            const { error } = await _supabase
+                .from('users')
+                .update({
+                    nickname,
+                    fullname,
+                    phone,
+                    photo_url: photoUrl,
+                    bio
+                })
+                .eq('id', currentUser.id);
 
-            // Also update active session
-            currentUser.nickname = nickname;
-            currentUser.photo_url = photoUrl;
-            setCurrentUser(currentUser);
+            if (error) {
+                showToast(`Error al guardar: ${error.message}`, "error");
+                return;
+            }
 
-            updateNavbar();
+            // Sync changes with local storage
+            await syncSession();
             showToast("Perfil actualizado correctamente.", "success");
-            
             setTimeout(() => {
                 window.location.href = "index.html";
             }, 1500);
         });
+
+        await loadProfile();
     }
 
     // --- INDEX PAGE LOGIC ---
@@ -379,9 +318,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentFilterCategory = "";
         let currentSearchQuery = "";
 
-        const renderIndexArticles = () => {
-            const articles = getArticles();
+        const renderIndexArticles = async () => {
+            articlesShowcaseGrid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem;"><span style="font-size: 2rem; animation: spin 1s infinite linear;">⏳</span><p style="margin-top: 1rem; color:var(--text-muted)">Cargando noticias desde Supabase...</p></div>`;
             
+            const { data: dbArticles, error } = await _supabase
+                .from('articles')
+                .select('*, users(email)');
+
+            if (error) {
+                articlesShowcaseGrid.innerHTML = `<div class="no-results" style="grid-column: 1 / -1;"><span style="font-size: 3rem;">❌</span><h3>Error al conectar con Supabase</h3><p>${error.message}</p></div>`;
+                return;
+            }
+
+            const articles = dbArticles.map(art => ({
+                ...art,
+                author_email: art.users ? art.users.email : 'desconocido'
+            }));
+
             // Filter
             const filtered = articles.filter(art => {
                 const matchesCategory = !currentFilterCategory || art.category === currentFilterCategory;
@@ -439,18 +392,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Event listeners for category filter
+        // Event chips
         const categoryChips = document.querySelectorAll('.category-chip');
         categoryChips.forEach(chip => {
             chip.addEventListener('click', () => {
                 categoryChips.forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-                currentFilterCategory = chip.getAttribute('data-category');
+                currentFilterCategory = chip.getAttribute('data-category') || "";
                 renderIndexArticles();
             });
         });
 
-        // Event listener for search box
+        // Search input
         const searchBox = document.getElementById('search-box');
         if (searchBox) {
             searchBox.addEventListener('input', (e) => {
@@ -459,8 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Render articles on initial load
-        renderIndexArticles();
+        await renderIndexArticles();
     }
 
     // --- ARTICLE DETAIL PAGE LOGIC ---
@@ -471,25 +423,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const notFoundDiv = document.getElementById('article-not-found');
 
         if (articleId) {
-            const articles = getArticles();
-            const article = articles.find(art => art.id === articleId);
+            const loadArticle = async () => {
+                const { data: article, error } = await _supabase
+                    .from('articles')
+                    .select('*, users(email)')
+                    .eq('id', articleId)
+                    .maybeSingle();
 
-            if (article) {
+                if (error || !article) {
+                    notFoundDiv.style.display = 'block';
+                    return;
+                }
+
                 document.title = `${article.title} - TECHLOG`;
                 document.getElementById('detail-image').src = article.image_url;
                 document.getElementById('detail-image').alt = article.title;
                 document.getElementById('detail-category').textContent = article.category;
                 document.getElementById('detail-date').textContent = article.created_at.substring(0, 16).replace('T', ' ');
-                document.getElementById('detail-author').textContent = `Por ${article.author_email}`;
+                document.getElementById('detail-author').textContent = `Por ${article.users ? article.users.email : 'desconocido'}`;
                 document.getElementById('article-detail-title').textContent = article.title;
                 
                 const contentBody = document.getElementById('article-detail-content');
                 contentBody.innerHTML = parseMarkdown(article.content);
                 
                 articleDetailView.style.display = 'block';
-            } else {
-                notFoundDiv.style.display = 'block';
-            }
+            };
+
+            await loadArticle();
         } else {
             notFoundDiv.style.display = 'block';
         }
@@ -498,9 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LOGIN PAGE LOGIC ---
     const loginForm = document.getElementById('login-submit-form');
     if (loginForm) {
-        // Redirect if already logged in
         if (getCurrentUser()) {
             window.location.href = "index.html";
+            return;
         }
 
         loginForm.addEventListener('submit', async (e) => {
@@ -513,58 +473,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const users = getUsers();
-            const user = users.find(u => u.email === email);
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
 
-            if (user && user.password === password) {
-                if (!user.is_verified) {
-                    // Generate new code and send email
-                    const code = String(Math.floor(100000 + Math.random() * 900000));
-                    user.verification_code = code;
-                    setUsers(users);
-
-                    localStorage.setItem('techlog_temp_user', JSON.stringify({ id: user.id, email: user.email }));
+            if (error) {
+                if (error.message.includes("Email not confirmed") || error.message.includes("confirm your email")) {
+                    safeStorage.setItem('techlog_temp_email', email);
+                    await _supabase.auth.resend({
+                        type: 'signup',
+                        email: email
+                    });
                     showToast("Tu cuenta aún no está verificada. Se ha enviado un nuevo código.", "warning");
-                    
-                    // Trigger real email or mock
-                    await sendVerificationEmail(user.email, code);
-
                     setTimeout(() => {
                         window.location.href = "verify.html";
                     }, 1500);
-                    return;
+                } else {
+                    showToast(`Error al iniciar sesión: ${error.message}`, "error");
                 }
-
-                // Log the user in
-                setCurrentUser({
-                    id: user.id,
-                    email: user.email,
-                    role: user.role,
-                    is_verified: user.is_verified,
-                    nickname: user.nickname || null,
-                    photo_url: user.photo_url || null
-                });
-
-                showToast(`¡Bienvenido de nuevo, ${user.email}!`, "success");
-                setTimeout(() => {
-                    if (user.role === 'Admin' || user.role === 'Editor') {
-                        window.location.href = "admin.html";
-                    } else {
-                        window.location.href = "index.html";
-                    }
-                }, 1500);
-            } else {
-                showToast("Credenciales incorrectas.", "error");
+                return;
             }
+
+            await syncSession();
+            showToast("¡Sesión iniciada con éxito!", "success");
+            
+            setTimeout(() => {
+                const user = getCurrentUser();
+                if (user && (user.role === 'Admin' || user.role === 'Editor')) {
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = "index.html";
+                }
+            }, 1500);
         });
     }
 
     // --- REGISTER PAGE LOGIC ---
     const registerForm = document.getElementById('register-submit-form');
     if (registerForm) {
-        // Redirect if already logged in
         if (getCurrentUser()) {
             window.location.href = "index.html";
+            return;
         }
 
         registerForm.addEventListener('submit', async (e) => {
@@ -582,48 +532,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const users = getUsers();
-            const userExists = users.some(u => u.email === email);
+            const { data, error } = await _supabase.auth.signUp({
+                email: email,
+                password: password
+            });
 
-            if (userExists) {
-                showToast("Este correo electrónico ya está registrado.", "error");
+            if (error) {
+                showToast(`Error al registrarse: ${error.message}`, "error");
                 return;
             }
 
-            // Generate verification code
-            const code = String(Math.floor(100000 + Math.random() * 900000));
-            const newUser = {
-                id: Date.now(),
-                email: email,
-                password: password,
-                role: 'Reader',
-                is_verified: false,
-                verification_code: code,
-                nickname: "",
-                fullname: "",
-                phone: "",
-                photo_url: "",
-                bio: "",
-                created_at: new Date().toISOString()
-            };
-
-            users.push(newUser);
-            setUsers(users);
-
-            // Save temp user context
-            localStorage.setItem('techlog_temp_user', JSON.stringify({ id: newUser.id, email: newUser.email }));
-
-            // Dispatch EmailJS or Local Mailbox
-            const sentReal = await sendVerificationEmail(email, code);
-
-            if (sentReal === true) {
-                showToast("Se ha enviado un código de verificación real a tu Gmail.", "success");
-            } else if (sentReal === false) {
-                showToast("Error en EmailJS. Revisa las llaves o el buzón virtual.", "error");
-            } else {
-                showToast(`[Simulación] Código generado: ${code}. Ingrésalo para verificar.`, "success");
-            }
-
+            safeStorage.setItem('techlog_temp_email', email);
+            showToast("¡Registro exitoso! Se ha enviado un código de confirmación a tu email.", "success");
+            
             setTimeout(() => {
                 window.location.href = "verify.html";
             }, 1500);
@@ -635,10 +556,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (verifyForm) {
         if (getCurrentUser()) {
             window.location.href = "index.html";
+            return;
         }
 
-        const tempUser = JSON.parse(localStorage.getItem('techlog_temp_user'));
-        if (!tempUser) {
+        const tempEmail = safeStorage.getItem('techlog_temp_email');
+        if (!tempEmail) {
             showToast("Acceso no autorizado.", "error");
             setTimeout(() => {
                 window.location.href = "login.html";
@@ -646,9 +568,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        document.getElementById('verify-email-lbl').textContent = tempUser.email;
+        document.getElementById('verify-email-lbl').textContent = tempEmail;
 
-        // Auto focus and digit limit
         const codeInput = document.getElementById('verification-code-input');
         if (codeInput) {
             codeInput.focus();
@@ -657,46 +578,36 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        verifyForm.addEventListener('submit', (e) => {
+        verifyForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const code = codeInput.value.trim();
 
-            const users = getUsers();
-            const userIndex = users.findIndex(u => u.id === tempUser.id);
+            const { data, error } = await _supabase.auth.verifyOtp({
+                email: tempEmail,
+                token: code,
+                type: 'signup'
+            });
 
-            if (userIndex !== -1 && users[userIndex].verification_code === code) {
-                users[userIndex].is_verified = true;
-                users[userIndex].verification_code = null;
-                setUsers(users);
-
-                // Log user in
-                setCurrentUser({
-                    id: users[userIndex].id,
-                    email: users[userIndex].email,
-                    role: users[userIndex].role,
-                    is_verified: true,
-                    nickname: users[userIndex].nickname || null,
-                    photo_url: users[userIndex].photo_url || null
-                });
-
-                localStorage.removeItem('techlog_temp_user');
-
-                showToast("¡Cuenta verificada exitosamente! Bienvenido.", "success");
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 1500);
-            } else {
-                showToast("Código de verificación incorrecto.", "error");
+            if (error) {
+                showToast(`Error de verificación: ${error.message}`, "error");
+                return;
             }
+
+            await syncSession();
+            safeStorage.removeItem('techlog_temp_email');
+
+            showToast("¡Cuenta verificada exitosamente! Bienvenido.", "success");
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 1500);
         });
     }
 
-    // --- ADMIN DASHBOARD PAGE LOGIC ---
+    // --- ADMIN PANEL LOGIC ---
     const adminPanelGrid = document.getElementById('admin-panel-grid');
     if (adminPanelGrid) {
         const currentUser = getCurrentUser();
         
-        // Security check
         if (!currentUser || (currentUser.role !== 'Admin' && currentUser.role !== 'Editor')) {
             showToast("Acceso denegado. No tienes permisos suficientes.", "error");
             setTimeout(() => {
@@ -711,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tabRoles.style.display = 'block';
         }
 
-        // Sidebar tabs switching logic
+        // Sidebar tabs switching
         const adminTabs = document.querySelectorAll('.sidebar-item');
         const adminPanes = document.querySelectorAll('.admin-pane');
 
@@ -729,14 +640,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         pane.classList.remove('active');
                     }
                 });
-                
-                if (targetPaneId === 'pane-mailbox') {
-                    refreshMockMailbox();
-                }
             });
         });
 
-        // WYSIWYG live preview engine
+        // WYSIWYG live preview
         const editorTextarea = document.getElementById('editor-content');
         const editorPreview = document.getElementById('editor-preview-content');
         const toolbarButtons = document.querySelectorAll('.toolbar-btn');
@@ -799,12 +706,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Render articles management table
-        const renderAdminArticles = () => {
-            const articles = getArticles();
+        const renderAdminArticles = async () => {
             const tbody = document.getElementById('admin-articles-tbody');
             if (!tbody) return;
 
-            // Sort newest first
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">⏳ Cargando noticias desde Supabase...</td></tr>`;
+
+            const { data: dbArticles, error } = await _supabase
+                .from('articles')
+                .select('*, users(email)');
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-pink); padding: 3rem 0;">❌ Error al conectar con Supabase: ${error.message}</td></tr>`;
+                return;
+            }
+
+            const articles = dbArticles.map(art => ({
+                ...art,
+                author_email: art.users ? art.users.email : 'desconocido'
+            }));
+
             articles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             if (articles.length > 0) {
@@ -841,18 +762,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Render user roles table
-        const renderAdminUsers = () => {
-            const users = getUsers();
+        // Render user roles table (Admin only)
+        const renderAdminUsers = async () => {
             const tbody = document.getElementById('admin-users-tbody');
             if (!tbody) return;
+
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">⏳ Cargando usuarios desde Supabase...</td></tr>`;
+
+            const { data: users, error } = await _supabase
+                .from('users')
+                .select('*');
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--accent-pink); padding: 3rem 0;">❌ Error al conectar con Supabase: ${error.message}</td></tr>`;
+                return;
+            }
 
             users.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             if (users.length > 0) {
                 tbody.innerHTML = users.map(u => `
                     <tr>
-                        <td>${u.id}</td>
+                        <td style="font-size: 0.75rem; font-family: monospace;">${u.id.substring(0, 8)}...</td>
                         <td style="font-weight: 700;">${u.email}</td>
                         <td>
                             <select class="role-select" data-user-id="${u.id}" id="role-select-${u.id}">
@@ -862,36 +793,37 @@ document.addEventListener('DOMContentLoaded', () => {
                             </select>
                         </td>
                         <td>
-                            ${u.is_verified ? `
-                                <span class="user-role role-reader" style="font-size:0.75rem;">Verificado</span>
-                            ` : `
-                                <span class="user-role role-admin" style="font-size:0.75rem;">Pendiente</span>
-                            `}
+                            <span class="user-role role-reader" style="font-size:0.75rem;">Verificado</span>
                         </td>
                         <td>${u.created_at.substring(0, 10)}</td>
                     </tr>
                 `).join('');
 
-                // Attach change listeners to select drops
+                // Attach change listeners
                 const roleSelects = document.querySelectorAll('.role-select');
                 roleSelects.forEach(select => {
-                    select.addEventListener('change', () => {
-                        const userId = parseInt(select.getAttribute('data-user-id'));
+                    select.addEventListener('change', async () => {
+                        const userId = select.getAttribute('data-user-id');
                         const newRole = select.value;
                         
                         if (userId === currentUser.id) {
                             showToast("No puedes cambiar tu propio rol por seguridad.", "error");
-                            renderAdminUsers();
+                            await renderAdminUsers();
                             return;
                         }
 
-                        const uList = getUsers();
-                        const uIdx = uList.findIndex(x => x.id === userId);
-                        if (uIdx !== -1) {
-                            uList[uIdx].role = newRole;
-                            setUsers(uList);
-                            showToast("Rol actualizado correctamente.", "success");
+                        const { error } = await _supabase
+                            .from('users')
+                            .update({ role: newRole })
+                            .eq('id', userId);
+
+                        if (error) {
+                            showToast(`Error al actualizar rol: ${error.message}`, "error");
+                            await renderAdminUsers();
+                            return;
                         }
+
+                        showToast("Rol actualizado correctamente.", "success");
                     });
                 });
             } else {
@@ -905,34 +837,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Render mock mailbox list
+        // Mailbox Pane update
         const refreshMockMailbox = () => {
             const mailList = document.getElementById('mailbox-list-container');
             if (!mailList) return;
 
-            const emails = getMockEmails();
-
-            if (emails.length === 0) {
-                mailList.innerHTML = `<div style="text-align:center;padding:2rem;color:#64748b;font-style:italic;">No hay correos en el buzón virtual de Gmail en este momento.</div>`;
-                return;
-            }
-
-            mailList.innerHTML = emails.slice().reverse().map(mail => `
-                <div class="mail-item">
-                    <div class="mail-item-header">
-                        <span class="mail-to">Para: ${mail.to}</span>
-                        <span class="mail-time">${mail.timestamp}</span>
-                    </div>
-                    <div class="mail-subj">Asunto: ${mail.subject}</div>
-                    <div class="mail-body">
-                        ${mail.body} 
-                        <span class="mail-code-badge">${mail.code}</span>
-                    </div>
+            mailList.innerHTML = `
+                <div style="text-align:center; padding:3rem; color:var(--text-muted); border: 1px dashed rgba(255,255,255,0.1); border-radius: 10px;">
+                    <span style="font-size: 3rem;">📧</span>
+                    <h3 style="margin-top: 1rem; color: var(--accent-teal);">Verificación en Tiempo Real Activa</h3>
+                    <p style="margin-top: 0.5rem; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                        La aplicación ahora está conectada directamente a <strong>Supabase Auth</strong>. El sistema enviará un código de verificación real a la bandeja de entrada del correo del usuario registrado. ¡Ya no se requiere un buzón simulado en local!
+                    </p>
                 </div>
-            `).join('');
+            `;
         };
 
-        // --- EMAILJS CONFIGURATION TAB LOGIC ---
+        // Settings Form (Optional configurations for EmailJS)
         const settingsForm = document.getElementById('settings-emailjs-form');
         if (settingsForm) {
             const enabledInput = document.getElementById('settings-emailjs-enabled');
@@ -940,29 +861,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const templateInput = document.getElementById('settings-emailjs-template');
             const publicKeyInput = document.getElementById('settings-emailjs-publickey');
 
-            // Load saved settings
-            enabledInput.checked = localStorage.getItem('techlog_emailjs_enabled') === 'true';
-            serviceInput.value = localStorage.getItem('techlog_emailjs_service') || "";
-            templateInput.value = localStorage.getItem('techlog_emailjs_template') || "";
-            publicKeyInput.value = localStorage.getItem('techlog_emailjs_publickey') || "";
+            enabledInput.checked = safeStorage.getItem('techlog_emailjs_enabled') === 'true';
+            serviceInput.value = safeStorage.getItem('techlog_emailjs_service') || "";
+            templateInput.value = safeStorage.getItem('techlog_emailjs_template') || "";
+            publicKeyInput.value = safeStorage.getItem('techlog_emailjs_publickey') || "";
 
             settingsForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                localStorage.setItem('techlog_emailjs_enabled', enabledInput.checked);
-                localStorage.setItem('techlog_emailjs_service', serviceInput.value.trim());
-                localStorage.setItem('techlog_emailjs_template', templateInput.value.trim());
-                localStorage.setItem('techlog_emailjs_publickey', publicKeyInput.value.trim());
+                safeStorage.setItem('techlog_emailjs_enabled', enabledInput.checked);
+                safeStorage.setItem('techlog_emailjs_service', serviceInput.value.trim());
+                safeStorage.setItem('techlog_emailjs_template', templateInput.value.trim());
+                safeStorage.setItem('techlog_emailjs_publickey', publicKeyInput.value.trim());
 
-                showToast("Configuración de EmailJS guardada con éxito.", "success");
+                showToast("Configuración opcional de EmailJS guardada.", "success");
             });
         }
 
-        // CRUD article submit logic (Create / Edit)
+        // CRUD article submit
         const articleForm = document.getElementById('article-form');
         let editingArticleId = null;
 
         if (articleForm) {
-            articleForm.addEventListener('submit', (e) => {
+            articleForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 const title = document.getElementById('article-title').value.trim();
@@ -986,101 +906,113 @@ document.addEventListener('DOMContentLoaded', () => {
                     imageUrl = catImages[category] || "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop";
                 }
 
-                const articles = getArticles();
-
                 if (editingArticleId) {
-                    const artIndex = articles.findIndex(a => a.id === editingArticleId);
-                    if (artIndex !== -1) {
-                        articles[artIndex].title = title;
-                        articles[artIndex].summary = summary;
-                        articles[artIndex].category = category;
-                        articles[artIndex].content = content;
-                        articles[artIndex].image_url = imageUrl;
-                        
-                        setArticles(articles);
-                        showToast("Artículo actualizado con éxito.", "success");
+                    const { error } = await _supabase
+                        .from('articles')
+                        .update({
+                            title,
+                            summary,
+                            category,
+                            content,
+                            image_url: imageUrl,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', editingArticleId);
+
+                    if (error) {
+                        showToast(`Error al actualizar noticia: ${error.message}`, "error");
+                        return;
                     }
+                    showToast("Artículo actualizado con éxito.", "success");
                 } else {
                     const newArt = {
-                        id: Date.now(),
-                        title: title,
-                        summary: summary,
-                        category: category,
-                        content: content,
+                        title,
+                        summary,
+                        category,
+                        content,
                         image_url: imageUrl,
-                        author_id: currentUser.id,
-                        author_email: currentUser.email,
-                        created_at: new Date().toISOString()
+                        author_id: currentUser.id
                     };
-                    articles.push(newArt);
-                    setArticles(articles);
+                    
+                    const { error } = await _supabase
+                        .from('articles')
+                        .insert([newArt]);
+
+                    if (error) {
+                        showToast(`Error al publicar noticia: ${error.message}`, "error");
+                        return;
+                    }
                     showToast("Artículo creado con éxito.", "success");
                 }
 
-                // Reset forms
                 articleForm.reset();
                 if (editorPreview) editorPreview.innerHTML = '<p style="color:#64748b;font-style:italic;">La previsualización en tiempo real aparecerá aquí...</p>';
                 editingArticleId = null;
                 document.getElementById('editor-submit-btn').textContent = 'Publicar Artículo';
                 document.getElementById('editor-pane-title').textContent = 'Redactar Nueva Noticia';
 
-                // Return to list pane
                 document.getElementById('tab-articles').click();
-                renderAdminArticles();
+                await renderAdminArticles();
             });
         }
 
-        // Global functions tied to edit/delete clicks
-        window.editArticle = function(id) {
-            const articles = getArticles();
-            const art = articles.find(a => a.id === id);
+        window.editArticle = async function(id) {
+            const { data: art, error } = await _supabase
+                .from('articles')
+                .select('*')
+                .eq('id', id)
+                .maybeSingle();
 
-            if (art) {
-                editingArticleId = art.id;
-                document.getElementById('article-title').value = art.title;
-                document.getElementById('article-summary').value = art.summary;
-                document.getElementById('article-category').value = art.category;
-                document.getElementById('editor-content').value = art.content;
-                document.getElementById('article-image-url').value = art.image_url;
-
-                document.getElementById('editor-submit-btn').textContent = 'Guardar Cambios';
-                document.getElementById('editor-pane-title').textContent = 'Editar Noticia';
-
-                if (editorTextarea) {
-                    editorTextarea.dispatchEvent(new Event('input'));
-                }
-
-                // Switch to write tab
-                document.getElementById('tab-write').click();
-                showToast("Artículo cargado en el editor.", "success");
-            } else {
+            if (error || !art) {
                 showToast("Artículo no encontrado.", "error");
+                return;
             }
+
+            editingArticleId = art.id;
+            document.getElementById('article-title').value = art.title;
+            document.getElementById('article-summary').value = art.summary;
+            document.getElementById('article-category').value = art.category;
+            document.getElementById('editor-content').value = art.content;
+            document.getElementById('article-image-url').value = art.image_url || "";
+
+            document.getElementById('editor-submit-btn').textContent = 'Guardar Cambios';
+            document.getElementById('editor-pane-title').textContent = 'Editar Noticia';
+
+            if (editorTextarea) {
+                editorTextarea.dispatchEvent(new Event('input'));
+            }
+
+            document.getElementById('tab-write').click();
+            showToast("Artículo cargado en el editor.", "success");
         };
 
-        window.deleteArticle = function(id) {
+        window.deleteArticle = async function(id) {
             if (!confirm("¿Está seguro de que desea eliminar permanentemente este artículo?")) return;
 
-            const articles = getArticles();
-            const filtered = articles.filter(a => a.id !== id);
+            const { error } = await _supabase
+                .from('articles')
+                .delete()
+                .eq('id', id);
 
-            setArticles(filtered);
+            if (error) {
+                showToast(`Error al eliminar: ${error.message}`, "error");
+                return;
+            }
+
             showToast("Artículo eliminado con éxito.", "success");
 
-            // Animate row removal
             const row = document.getElementById(`article-row-${id}`);
             if (row) {
                 row.style.transition = 'all 0.4s ease';
                 row.style.opacity = '0';
                 row.style.transform = 'scale(0.9)';
-                setTimeout(() => {
+                setTimeout(async () => {
                     row.remove();
-                    renderAdminArticles(); // fallbacks
+                    await renderAdminArticles();
                 }, 400);
             }
         };
 
-        // Mailbox manual refresh
         const mailboxRefreshBtn = document.getElementById('mailbox-refresh-btn');
         if (mailboxRefreshBtn) {
             mailboxRefreshBtn.addEventListener('click', () => {
@@ -1089,12 +1021,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Init views
-        renderAdminArticles();
-        renderAdminUsers();
+        // Init admin tables
+        await renderAdminArticles();
+        await renderAdminUsers();
         refreshMockMailbox();
-        
-        // Auto refresh mailbox if visible
-        setInterval(refreshMockMailbox, 10000);
     }
 });

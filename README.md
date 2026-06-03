@@ -20,104 +20,93 @@ TECHLOG resuelve estos retos unificando:
 *   **Panel Administrativo**:
     *   **Escritores/Editores**: Panel para crear, editar, previsualizar y eliminar noticias utilizando un editor visual interactivo.
     *   **Administrador**: Control total sobre noticias y un gestor dinámico de roles de usuarios para ascender o descender accesos (`Reader` ➔ `Editor` ➔ `Admin`) instantáneamente.
-    *   **Buzón Virtual**: Visualizador local de correos electrónicos de verificación generados por la app para facilitar las pruebas de desarrollo.
+    *   **Buzón Virtual**: Visualizador local de correos electrónicos de verificación generados por la app pa## 🏗️ Arquitectura del Software
 
----
-
-## 🏗️ Arquitectura del Software
-
-TECHLOG está diseñado bajo una arquitectura monolítica modular, lo que simplifica su despliegue y minimiza las dependencias externas, logrando un rendimiento óptimo.
+TECHLOG está diseñado bajo una **arquitectura Serverless de 1 Capa**, lo que significa que el frontend (cliente estático en el navegador) interactúa directamente con los servicios en la nube de **Supabase** para gestionar la persistencia y la autenticación. Esto elimina por completo la necesidad de un servidor de backend intermedio (como Flask o Express), garantizando la máxima portabilidad, velocidad y facilidad de despliegue.
 
 ```mermaid
 graph TD
     %% Frontend Components
-    subgraph Frontend [Capa de Presentación - Cliente]
+    subgraph Frontend [Capa de Presentación - Cliente Browser]
         A[HTML5 & CSS Glassmorphic] -->|Interacciones JS| B[Editor Visual WYSIWYG]
         A -->|Búsquedas y Filtros| C[Noticias / Categorías]
-        A -->|Formularios AJAX| D[Autenticación & Registro]
+        A -->|Formularios AJAX| D[Autenticación & Perfil]
     end
 
-    %% Backend Server
-    subgraph Backend [Capa de Lógica - Servidor Flask]
-        E[Manejador de Rutas & Sesiones]
-        F[Autenticación & Hashing de Claves]
-        G[Gestión de Artículos & Usuarios]
-        H[Controlador SMTP & Mailer Simulado]
-    end
-
-    %% Database
-    subgraph Base_Datos [Capa de Datos - SQLite]
-        I[(blog.db)]
+    %% Supabase Cloud Services
+    subgraph Supabase [Infraestructura de Datos Externa - Supabase Cloud]
+        E[Supabase Auth - Gestión de Sesiones & OTP]
+        F[(PostgreSQL Database - public.users)]
+        G[(PostgreSQL Database - public.articles)]
     end
 
     %% Flow Connections
-    A <===>|Llamadas Asíncronas Fetch / JSON| E
-    E <---> F
-    E <---> G
-    E <---> H
-    G <--->|Queries SQL / Conexión Segura| I
-    H -.->|Correo Real| J[Servidores SMTP de Gmail]
-    H -.->|Correo Simulado| K[Buzón Virtual en Panel Admin]
+    A <===>|Supabase JS SDK / REST API| E
+    A <===>|Consultas de Lectura y CRUD| F
+    A <===>|Consultas de Lectura y CRUD| G
+    E -.->|Mensajes de Confirmación Real| H[Bandeja de Entrada del Lector]
 ```
 
 ### Flujo de Funcionamiento:
-1.  **Lectura y Búsqueda**: El usuario consulta el frontend. El script `main.js` intercepta filtros o búsquedas y el servidor Flask recupera los datos desde **SQLite** estructuradamente.
+1.  **Lectura y Búsqueda**: El usuario consulta el frontend. El script `main.js` realiza llamadas asíncronas directamente a la API REST de **Supabase** (`public.articles` y `public.users`) usando el SDK cliente para recuperar las noticias ordenadas por fecha con sus respectivos autores.
 2.  **Registro y Verificación**:
-    *   El usuario se registra, se genera un hash seguro de su clave y un código aleatorio de 6 dígitos.
-    *   Si hay credenciales SMTP en `.env`, se envía un correo real a través de Gmail; si no, el correo se simula localmente y se registra en el **Buzón Virtual** en el Panel Admin.
-    *   El usuario introduce el código y su cuenta se marca como activa.
-3.  **Roles y Administración**: El administrador puede acceder a la lista de usuarios y ascenderlos. Flask valida mediante decoradores y middleware de sesión que solo los usuarios autorizados ejecuten acciones destructivas en la base de datos.
+    *   El usuario se registra mediante el servicio nativo de autenticación de Supabase (`supabase.auth.signUp`). Esto crea la cuenta en la tabla protegida `auth.users`.
+    *   Un **Trigger en PostgreSQL** (`on_auth_user_created`) se dispara automáticamente en Supabase e inserta el perfil correspondiente en la tabla pública de usuarios (`public.users`) con el rol inicial de `'Reader'`.
+    *   Supabase envía un correo de confirmación real con un código OTP de 6 dígitos al correo del usuario.
+    *   El usuario ingresa el código OTP en la vista de verificación (`verify.html`) y se activa su sesión mediante `supabase.auth.verifyOtp`.
+3.  **Roles y Administración**: Los permisos se gestionan leyendo el rol del perfil del usuario en la base de datos pública. El administrador principal puede gestionar roles y ascender o descender cuentas, lo que actualiza la base de datos de Supabase en tiempo real.
 
 ---
 
 ## 💻 Stack Tecnológico & Arquitectura Estática (GitHub Pages)
 
-La aplicación soporta **dos modos de ejecución** para garantizar la máxima portabilidad:
+La aplicación es un **sistema 100% estático (Serverless)**, lo que optimiza el rendimiento y permite un despliegue inmediato en cualquier hosting estático.
 
-1. **Modo Estático / Servidor Cliente (Recomendado para GitHub Pages)**:
-   * **Ubicación**: En la raíz del repositorio (`index.html`, `admin.html`, etc.).
-   * **Persistencia**: Se gestiona una base de datos local simulada en el navegador usando `localStorage`.
-   * **Despliegue**: Totalmente compatible con **GitHub Pages**. Al estar el archivo `index.html` en la raíz del repositorio, GitHub Pages lo cargará de forma automática como página de inicio principal sin requerir configuración adicional de servidores.
-
-2. **Modo Dinámico / Servidor Flask (Python + SQLite)**:
-   * **Ubicación**: Lógica de servidor en `app.py` y plantillas Jinja2 en `templates/`.
-   * **Base de Datos**: SQLite (`blog.db`) local.
-   * **Despliegue**: Diseñado para plataformas que admiten ejecución de scripts en backend (como Heroku, Render o servidores VPS).
-
+*   **Despliegue (GitHub Pages)**: Totalmente compatible. Al estar el archivo `index.html` en la raíz del repositorio, GitHub Pages lo cargará de forma automática como página de inicio principal sin requerir configuración adicional de servidores backend.
+*   **Base de Datos e Infraestructura**: **Externa** mediante **Supabase (Relacional PostgreSQL)**. La persistencia se basa en un motor relacional en la nube.
+*   **Autenticación**: Nativa de Supabase Auth, reemplazando el hashing del servidor y los cookies de sesión tradicionales por tokens JWT del lado del cliente.
 *   **Frontend**:
     *   **HTML5 Semántico**: Estructura de marcado moderna optimizada para accesibilidad y SEO.
-    *   **Vanilla CSS**: Hoja de estilos premium hecha a mano utilizando variables de diseño, estética oscura neon con efectos *Glassmorphism* (`backdrop-filter`) y micro-animaciones en tarjetas y botones.
-    *   **JavaScript Nativo (ES6)**: Control reactivo de vistas, operaciones de almacenamiento en `localStorage`, e integración dinámica de vistas y markdown.
-*   **Control del Repositorio**:
-    *   **Git REST API**: Script en Python (`git_push.py`) para la sincronización remota e integración con GitHub a través del token personal en entornos sin Git CLI instalado.
-
+    *   **Vanilla CSS**: Hoja de estilos premium hecha a mano utilizando variables de diseño, estética oscura neon con efectos *Glassmorphism* (`backdrop-filter`) y micro-animaciones.
+    *   **JavaScript Nativo (ES6)**: Integrado con el SDK de Supabase (`@supabase/supabase-js`) cargado vía CDN para realizar operaciones asíncronas (async/await).
 
 ---
 
 ## 🗄️ Modelo de Datos
 
-TECHLOG utiliza una base de datos **Relacional SQLite** (`blog.db`) almacenada de forma **interna** en la raíz de la aplicación para garantizar portabilidad inmediata.
+TECHLOG utiliza una base de datos **Relacional PostgreSQL** externa alojada en **Supabase** para garantizar persistencia y seguridad multiusuario en tiempo real.
 
 ```
                   ┌─────────────────┐
-                  │      USERS      │
+                  │   AUTH.USERS    │ (Esquema interno Supabase)
                   ├─────────────────┤
-                  │ id (PK)         │ 1
+                  │ id (PK - UUID)  │
+                  │ email (UNIQUE)  │
+                  └─────────────────┘
+                           │
+                           │ 1:1 (Relación de Perfil)
+                           ▼
+                  ┌─────────────────┐
+                  │  PUBLIC.USERS   │ (Esquema público)
+                  ├─────────────────┤
+                  │ id (PK - UUID)  │ 1
                   │ email (UNIQUE)  │ ───┐
-                  │ password_hash   │    │
                   │ role            │    │
-                  │ is_verified     │    │
-                  │ verification_co │    │
+                  │ nickname        │    │
+                  │ fullname        │    │
+                  │ phone           │    │
+                  │ photo_url       │    │
+                  │ bio             │    │
                   │ created_at      │    │
                   └─────────────────┘    │
                                          │
-                                         │ 1:N (Autoría)
+                                         │ 1:N (Autoría de noticias)
                                          │
                                          ▼
                   ┌─────────────────┐    N
-                  │    ARTICLES     │
+                  │ PUBLIC.ARTICLES │
                   ├─────────────────┤ ───┘
-                  │ id (PK)         │
+                  │ id (PK - BIGINT)│
                   │ title           │
                   │ content         │
                   │ summary         │
@@ -130,24 +119,26 @@ TECHLOG utiliza una base de datos **Relacional SQLite** (`blog.db`) almacenada d
 ```
 
 ### Detalle de las Tablas:
-1.  **`users`**:
-    *   `id` (INTEGER, Llave Primaria, Auto-incremental)
+1.  **`public.users`**:
+    *   `id` (UUID, Llave Primaria, Referencia a `auth.users.id` con eliminación en cascada)
     *   `email` (TEXT, Único, No Nulo)
-    *   `password_hash` (TEXT, Hashed mediante PBKDF2:SHA256, No Nulo)
     *   `role` (TEXT, por defecto 'Reader', valores: 'Reader', 'Editor', 'Admin')
-    *   `is_verified` (INTEGER, 0=Pendiente, 1=Verificado)
-    *   `verification_code` (TEXT, código temporal de 6 dígitos)
-    *   `created_at` (TIMESTAMP, fecha de registro)
-2.  **`articles`**:
-    *   `id` (INTEGER, Llave Primaria, Auto-incremental)
+    *   `nickname` (TEXT, apodo público)
+    *   `fullname` (TEXT, nombre real completo)
+    *   `phone` (TEXT, teléfono de contacto)
+    *   `photo_url` (TEXT, enlace de imagen de avatar)
+    *   `bio` (TEXT, biografía resumida)
+    *   `created_at` (TIMESTAMP WITH TIME ZONE, fecha de registro)
+2.  **`public.articles`**:
+    *   `id` (BIGINT, Llave Primaria, Auto-incremental por identidad)
     *   `title` (TEXT, No Nulo)
-    *   `content` (TEXT, Cuerpo del artículo, No Nulo)
+    *   `content` (TEXT, Cuerpo de la noticia en formato markdown, No Nulo)
     *   `summary` (TEXT, Resumen corto, No Nulo)
     *   `category` (TEXT, categorías: 'IA', 'Software', 'Hardware', 'Ciberseguridad')
-    *   `author_id` (INTEGER, Llave Foránea hacia `users.id` con eliminación en cascada)
+    *   `author_id` (UUID, Llave Foránea hacia `public.users.id` con eliminación en cascada)
     *   `image_url` (TEXT, enlace a imagen representativa)
-    *   `created_at` (TIMESTAMP, fecha de creación)
-    *   `updated_at` (TIMESTAMP, fecha de última modificación)
+    *   `created_at` (TIMESTAMP WITH TIME ZONE, fecha de creación)
+    *   `updated_at` (TIMESTAMP WITH TIME ZONE, fecha de última modificación)
 
 ---
 
