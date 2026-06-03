@@ -52,8 +52,8 @@ graph TD
 2.  **Registro y Verificación**:
     *   El usuario se registra mediante el servicio nativo de autenticación de Supabase (`supabase.auth.signUp`). Esto crea la cuenta en la tabla protegida `auth.users`.
     *   Un **Trigger en PostgreSQL** (`on_auth_user_created`) se dispara automáticamente en Supabase e inserta el perfil correspondiente en la tabla pública de usuarios (`public.users`) con el rol inicial de `'Reader'`.
-    *   Supabase envía un correo de confirmación real con un código OTP de 6 dígitos al correo del usuario.
-    *   El usuario ingresa el código OTP en la vista de verificación (`verify.html`) y se activa su sesión mediante `supabase.auth.verifyOtp`.
+    *   Supabase envía un correo con un enlace de confirmación real al correo del usuario.
+    *   Al hacer clic en el enlace de confirmación, la sesión se activa automáticamente y el usuario es redirigido de vuelta al blog ya autenticado.
 3.  **Roles y Administración**: Los permisos se gestionan leyendo el rol del perfil del usuario en la base de datos pública. El administrador principal puede gestionar roles y ascender o descender cuentas, lo que actualiza la base de datos de Supabase en tiempo real.
 
 ---
