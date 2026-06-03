@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - TECHLOG</title>
+    <!-- SEO Optimization Meta Tags -->
+    <meta name="description" content="Editar perfil de usuario en TECHLOG.">
+    <meta name="keywords" content="Tecnología, IA, Software, Hardware, Ciberseguridad, Noticias, Blog">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom Theme Stylesheet -->
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <!-- Navbar Header -->
+    <nav class="navbar" id="nav-header">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo" id="nav-logo-link">TECHLOG</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link" id="nav-home">Noticias</a></li>
+                <li id="nav-admin-li" style="display: none;"><a href="admin.html" class="nav-link" id="nav-admin">Panel Admin</a></li>
+            </ul>
+            <div class="nav-auth-actions" id="nav-auth-container">
+                <!-- Loaded dynamically by JS -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="container" id="main-content-body">
+        <div class="back-btn-container" id="back-btn-wrapper">
+            <a href="index.html" class="btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 0.5rem;" id="back-to-home-btn">
+                <span>←</span> Volver al inicio
+            </a>
+        </div>
+
+        <div class="form-card" id="profile-form-card" style="max-width: 650px; margin: 0 auto;">
+            <header class="form-header">
+                <h2 class="form-title" id="profile-title">Mi Perfil</h2>
+                <p class="form-subtitle" id="profile-subtitle">Personaliza tu apodo, foto de perfil y detalles de contacto</p>
+            </header>
+
+            <form id="profile-submit-form">
+                <!-- Profile Image Circle Preview -->
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;">
+                    <div style="width: 110px; height: 110px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent-purple); box-shadow: 0 0 15px rgba(124,58,237,0.3); background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
+                        <img src="" alt="Avatar" id="profile-avatar-preview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <span id="profile-avatar-fallback" style="font-size: 3rem; color: var(--text-muted);">👤</span>
+                    </div>
+                    <span class="user-role role-reader" id="profile-role-badge">Reader</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="profile-email" class="form-label">Correo Electrónico (No editable)</label>
+                        <input type="email" id="profile-email" class="form-control" disabled style="opacity: 0.6; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="profile-nickname" class="form-label">Apodo / Nombre de Usuario</label>
+                        <input type="text" id="profile-nickname" class="form-control" placeholder="Ej. tecnolover" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="profile-fullname" class="form-label">Nombre Completo</label>
+                        <input type="text" id="profile-fullname" class="form-control" placeholder="Ej. Angela Castro">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="profile-phone" class="form-label">Teléfono</label>
+                        <input type="tel" id="profile-phone" class="form-control" placeholder="Ej. +57 300 1234567">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="profile-photourl" class="form-label">URL de la Foto de Perfil</label>
+                    <input type="url" id="profile-photourl" class="form-control" placeholder="https://images.unsplash.com/photo-...">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label for="profile-bio" class="form-label">Biografía o Resumen</label>
+                    <textarea id="profile-bio" class="form-control" rows="3" placeholder="Cuéntanos un poco sobre ti y tus intereses tecnológicos..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 0.8rem; border-radius: 8px; font-weight: 700; cursor: pointer; border:none;" id="profile-btn-submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Toast Container for Animated Alerts -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer-section">
+        <div class="footer-container">
+            <p>&copy; 2026 TECHLOG - Blog Tecnológico. Creado con Antigravity IDE & Gemini.</p>
+            <ul class="footer-links" id="footer-nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li id="footer-login-li"><a href="login.html">Acceso Admin</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript Assets -->
+    <script src="static/js/main.js"></script>
+</body>
+</html>

@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: "Cómo proteger tus aplicaciones contra inyecciones SQL",
             summary: "Guía práctica con ejemplos reales para blindar tus bases de datos contra una de las vulnerabilidades más antiguas y destructivas de la web.",
             category: "Ciberseguridad",
-            content: "## ¿Qué es la Inyección SQL?\n\nLa inyección SQL (SQLi) ocurre cuando un atacante logra insertar código SQL malicioso dentro de una consulta realizada por la aplicación a la base de datos. Esto puede resultar en la filtración de contraseñas, robo de datos o incluso destrucción de la base de datos.\n\n## Malas prácticas vs. Buenas prácticas\n\n### Vulnerable:\n`SELECT * FROM users WHERE email = '` + userInput + `' AND password = ...`\n\n### Seguro (Consultas Preparadas):\n`SELECT * FROM users WHERE email = ? AND password = ?`\n\n## Medidas preventivas:\n\n1. **Usar siempre Parametrización**: Nunca concatenar strings en queries.\n2. **Validación de entradas**: Filtrar caracteres sospechosos.\n3. **Principio de menor privilegio**: Que la conexión de la app solo tenga los permisos estrictamente necesarios.",
+            content: "## ¿Qué es la Inyección SQL?\n\nLa inyección SQL (SQLi) ocurre cuando un atacante logra insertar código SQL malicioso dentro de una consulta realizada por la aplicación a la base de datos. Esto puede resultar en la filtración de contraseñas, robo de datos o incluso destrucción de la base de datos.\n\n## Medidas preventivas:\n\n1. **Usar siempre Parametrización**: Nunca concatenar strings en queries.\n2. **Validación de entradas**: Filtrar caracteres sospechosos.\n3. **Principio de menor privilegio**: Que la conexión de la app solo tenga los permisos estrictamente necesarios.",
             image_url: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600&auto=format&fit=crop",
             author_id: 100,
             author_email: "admin@techblog.com",
@@ -65,6 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
             role: "Admin",
             is_verified: true,
             verification_code: null,
+            nickname: "Administrador",
+            fullname: "Administrador TECHLOG",
+            phone: "+34 600 000 000",
+            photo_url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop",
+            bio: "Cuenta de administrador principal de TECHLOG. Encargado de la gestión de roles y noticias.",
             created_at: new Date().toISOString()
         }
     ];
@@ -122,12 +127,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const footerLoginLi = document.getElementById('footer-login-li');
 
         if (currentUser) {
-            // Update auth actions in navbar to show user badge
+            // Find current user's profile details in database
+            const users = getUsers();
+            const dbUser = users.find(u => u.id === currentUser.id) || currentUser;
+
+            // Update auth actions in navbar to show nickname and circular avatar
             if (navAuthContainer) {
+                const displayName = dbUser.nickname || dbUser.email.split('@')[0];
+                const avatarUrl = dbUser.photo_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+                
                 navAuthContainer.innerHTML = `
-                    <div class="user-badge" id="nav-user-badge">
-                        <span id="nav-user-email">${currentUser.email}</span>
-                        <span class="user-role role-${currentUser.role.toLowerCase()}" id="nav-user-role-lbl">${currentUser.role}</span>
+                    <div class="user-badge" id="nav-user-badge" style="display: flex; align-items: center; gap: 0.75rem;">
+                        <a href="profile.html" class="nav-profile-link" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;" title="Editar mi Perfil">
+                            <img src="${avatarUrl}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--accent-purple); background: rgba(255,255,255,0.05);">
+                            <span style="font-weight: 600; color: #fff; font-size: 0.9rem;">${displayName}</span>
+                        </a>
+                        <span class="user-role role-${dbUser.role.toLowerCase()}" id="nav-user-role-lbl">${dbUser.role}</span>
                         <button class="btn-outline btn-sm" style="border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.15);" id="nav-logout-btn">Salir</button>
                     </div>
                 `;
@@ -138,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Show Admin Panel link if Role is Admin or Editor
             if (navAdminLi) {
-                if (currentUser.role === 'Admin' || currentUser.role === 'Editor') {
+                if (dbUser.role === 'Admin' || dbUser.role === 'Editor') {
                     navAdminLi.style.display = 'block';
                 } else {
                     navAdminLi.style.display = 'none';
@@ -192,6 +207,170 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/#\s*([^\n<]+)/g, '<h1>$1</h1>')
             .replace(/>\s*([^\n<]+)/g, '<blockquote>$1</blockquote>')
             .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#a78bfa;text-decoration:underline;">$1</a>');
+    }
+
+    // --- PASSWORD VISIBILITY TOGGLE ENGINE ---
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password');
+    
+    if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            togglePasswordBtn.textContent = isPassword ? '🙈' : '👁️';
+        });
+    }
+
+    // --- EMAILJS INTEGRATION HELPER ---
+    async function sendVerificationEmail(recipientEmail, code) {
+        const enabled = localStorage.getItem('techlog_emailjs_enabled') === 'true';
+        const serviceId = localStorage.getItem('techlog_emailjs_service');
+        const templateId = localStorage.getItem('techlog_emailjs_template');
+        const publicKey = localStorage.getItem('techlog_emailjs_publickey');
+
+        // Always save mock mailbox entry locally so it remains inspectable in dashboard
+        const mockEntry = {
+            to: recipientEmail,
+            code: code,
+            subject: "Verifica tu cuenta - Blog Tecnológico",
+            body: `Tu código de verificación de 6 dígitos es: `,
+            timestamp: new Date().toLocaleTimeString()
+        };
+        const emails = getMockEmails();
+        emails.push(mockEntry);
+        if (emails.length > 10) emails.shift();
+        setMockEmails(emails);
+
+        if (enabled && serviceId && templateId && publicKey) {
+            try {
+                const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        service_id: serviceId,
+                        template_id: templateId,
+                        user_id: publicKey,
+                        template_params: {
+                            to_email: recipientEmail,
+                            code: code
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    console.log(`[EmailJS] Verification code sent to ${recipientEmail}`);
+                    return true;
+                } else {
+                    const errText = await response.text();
+                    console.error("[EmailJS Error]", errText);
+                    return false;
+                }
+            } catch (err) {
+                console.error("[EmailJS Fetch Error]", err);
+                return false;
+            }
+        }
+        
+        console.log(`[Simulation Mode] Code for ${recipientEmail}: ${code}`);
+        return null; // Simulated
+    }
+
+    // --- PROFILE MANAGEMENT LOGIC ---
+    const profileForm = document.getElementById('profile-submit-form');
+    if (profileForm) {
+        const currentUser = getCurrentUser();
+        if (!currentUser) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        const users = getUsers();
+        const userIndex = users.findIndex(u => u.id === currentUser.id);
+
+        if (userIndex === -1) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        const user = users[userIndex];
+        const emailInput = document.getElementById('profile-email');
+        const nicknameInput = document.getElementById('profile-nickname');
+        const fullnameInput = document.getElementById('profile-fullname');
+        const phoneInput = document.getElementById('profile-phone');
+        const photoUrlInput = document.getElementById('profile-photourl');
+        const bioInput = document.getElementById('profile-bio');
+        const avatarPreview = document.getElementById('profile-avatar-preview');
+        const avatarFallback = document.getElementById('profile-avatar-fallback');
+        const roleBadge = document.getElementById('profile-role-badge');
+
+        // Populate fields
+        emailInput.value = user.email;
+        nicknameInput.value = user.nickname || user.email.split('@')[0];
+        fullnameInput.value = user.fullname || "";
+        phoneInput.value = user.phone || "";
+        photoUrlInput.value = user.photo_url || "";
+        bioInput.value = user.bio || "";
+        
+        roleBadge.textContent = user.role;
+        roleBadge.className = `user-role role-${user.role.toLowerCase()}`;
+
+        // Preview helper
+        const updateAvatarPreview = (url) => {
+            if (url && url.startsWith('http')) {
+                avatarPreview.src = url;
+                avatarPreview.style.display = 'block';
+                avatarFallback.style.display = 'none';
+            } else {
+                avatarPreview.style.display = 'none';
+                avatarFallback.style.display = 'block';
+            }
+        };
+
+        // Initialize preview
+        updateAvatarPreview(user.photo_url);
+
+        // Update preview dynamically on typing
+        photoUrlInput.addEventListener('input', (e) => {
+            updateAvatarPreview(e.target.value.trim());
+        });
+
+        // Submit form handler
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nickname = nicknameInput.value.trim();
+            const fullname = fullnameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            const photoUrl = photoUrlInput.value.trim();
+            const bio = bioInput.value.trim();
+
+            if (!nickname) {
+                showToast("El apodo es requerido.", "error");
+                return;
+            }
+
+            // Save details in local user record
+            users[userIndex].nickname = nickname;
+            users[userIndex].fullname = fullname;
+            users[userIndex].phone = phone;
+            users[userIndex].photo_url = photoUrl;
+            users[userIndex].bio = bio;
+            setUsers(users);
+
+            // Also update active session
+            currentUser.nickname = nickname;
+            currentUser.photo_url = photoUrl;
+            setCurrentUser(currentUser);
+
+            updateNavbar();
+            showToast("Perfil actualizado correctamente.", "success");
+            
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 1500);
+        });
     }
 
     // --- INDEX PAGE LOGIC ---
@@ -324,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = "index.html";
         }
 
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
@@ -339,8 +518,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (user && user.password === password) {
                 if (!user.is_verified) {
+                    // Generate new code and send email
+                    const code = String(Math.floor(100000 + Math.random() * 900000));
+                    user.verification_code = code;
+                    setUsers(users);
+
                     localStorage.setItem('techlog_temp_user', JSON.stringify({ id: user.id, email: user.email }));
-                    showToast("Tu cuenta aún no está verificada. Por favor introduce tu código de verificación.", "warning");
+                    showToast("Tu cuenta aún no está verificada. Se ha enviado un nuevo código.", "warning");
+                    
+                    // Trigger real email or mock
+                    await sendVerificationEmail(user.email, code);
+
                     setTimeout(() => {
                         window.location.href = "verify.html";
                     }, 1500);
@@ -352,7 +540,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: user.id,
                     email: user.email,
                     role: user.role,
-                    is_verified: user.is_verified
+                    is_verified: user.is_verified,
+                    nickname: user.nickname || null,
+                    photo_url: user.photo_url || null
                 });
 
                 showToast(`¡Bienvenido de nuevo, ${user.email}!`, "success");
@@ -377,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = "index.html";
         }
 
-        registerForm.addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
@@ -409,29 +599,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 role: 'Reader',
                 is_verified: false,
                 verification_code: code,
+                nickname: "",
+                fullname: "",
+                phone: "",
+                photo_url: "",
+                bio: "",
                 created_at: new Date().toISOString()
             };
 
             users.push(newUser);
             setUsers(users);
 
-            // Save in mock emails list
-            const mockEntry = {
-                to: email,
-                code: code,
-                subject: "Verifica tu cuenta - Blog Tecnológico",
-                body: `Tu código de verificación de 6 dígitos es: `,
-                timestamp: "Recién enviado"
-            };
-            const emails = getMockEmails();
-            emails.push(mockEntry);
-            if (emails.length > 10) emails.shift();
-            setMockEmails(emails);
-
             // Save temp user context
             localStorage.setItem('techlog_temp_user', JSON.stringify({ id: newUser.id, email: newUser.email }));
 
-            showToast(`[Simulación] Código generado: ${code}. Ingrésalo para verificar.`, "success");
+            // Dispatch EmailJS or Local Mailbox
+            const sentReal = await sendVerificationEmail(email, code);
+
+            if (sentReal === true) {
+                showToast("Se ha enviado un código de verificación real a tu Gmail.", "success");
+            } else if (sentReal === false) {
+                showToast("Error en EmailJS. Revisa las llaves o el buzón virtual.", "error");
+            } else {
+                showToast(`[Simulación] Código generado: ${code}. Ingrésalo para verificar.`, "success");
+            }
+
             setTimeout(() => {
                 window.location.href = "verify.html";
             }, 1500);
@@ -482,7 +674,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: users[userIndex].id,
                     email: users[userIndex].email,
                     role: users[userIndex].role,
-                    is_verified: true
+                    is_verified: true,
+                    nickname: users[userIndex].nickname || null,
+                    photo_url: users[userIndex].photo_url || null
                 });
 
                 localStorage.removeItem('techlog_temp_user');
@@ -737,6 +931,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `).join('');
         };
+
+        // --- EMAILJS CONFIGURATION TAB LOGIC ---
+        const settingsForm = document.getElementById('settings-emailjs-form');
+        if (settingsForm) {
+            const enabledInput = document.getElementById('settings-emailjs-enabled');
+            const serviceInput = document.getElementById('settings-emailjs-service');
+            const templateInput = document.getElementById('settings-emailjs-template');
+            const publicKeyInput = document.getElementById('settings-emailjs-publickey');
+
+            // Load saved settings
+            enabledInput.checked = localStorage.getItem('techlog_emailjs_enabled') === 'true';
+            serviceInput.value = localStorage.getItem('techlog_emailjs_service') || "";
+            templateInput.value = localStorage.getItem('techlog_emailjs_template') || "";
+            publicKeyInput.value = localStorage.getItem('techlog_emailjs_publickey') || "";
+
+            settingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                localStorage.setItem('techlog_emailjs_enabled', enabledInput.checked);
+                localStorage.setItem('techlog_emailjs_service', serviceInput.value.trim());
+                localStorage.setItem('techlog_emailjs_template', templateInput.value.trim());
+                localStorage.setItem('techlog_emailjs_publickey', publicKeyInput.value.trim());
+
+                showToast("Configuración de EmailJS guardada con éxito.", "success");
+            });
+        }
 
         // CRUD article submit logic (Create / Edit)
         const articleForm = document.getElementById('article-form');
