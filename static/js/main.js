@@ -480,15 +480,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (error) {
                 if (error.message.includes("Email not confirmed") || error.message.includes("confirm your email")) {
-                    safeStorage.setItem('techlog_temp_email', email);
                     await _supabase.auth.resend({
                         type: 'signup',
                         email: email
                     });
-                    showToast("Tu cuenta aún no está verificada. Se ha enviado un nuevo código.", "warning");
-                    setTimeout(() => {
-                        window.location.href = "verify.html";
-                    }, 1500);
+                    showToast("Tu cuenta aún no está verificada. Se ha reenviado el enlace de confirmación a tu correo.", "warning");
                 } else {
                     showToast(`Error al iniciar sesión: ${error.message}`, "error");
                 }
@@ -542,66 +538,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            safeStorage.setItem('techlog_temp_email', email);
-            showToast("¡Registro exitoso! Se ha enviado un código de confirmación a tu email.", "success");
+            showToast("¡Registro exitoso! Por favor, haz clic en el enlace de confirmación enviado a tu correo.", "success");
             
             setTimeout(() => {
-                window.location.href = "verify.html";
-            }, 1500);
-        });
-    }
-
-    // --- VERIFY PAGE LOGIC ---
-    const verifyForm = document.getElementById('verify-submit-form');
-    if (verifyForm) {
-        if (getCurrentUser()) {
-            window.location.href = "index.html";
-            return;
-        }
-
-        const tempEmail = safeStorage.getItem('techlog_temp_email');
-        if (!tempEmail) {
-            showToast("Acceso no autorizado.", "error");
-            setTimeout(() => {
                 window.location.href = "login.html";
-            }, 1000);
-            return;
-        }
-
-        document.getElementById('verify-email-lbl').textContent = tempEmail;
-
-        const codeInput = document.getElementById('verification-code-input');
-        if (codeInput) {
-            codeInput.focus();
-            codeInput.addEventListener('input', () => {
-                codeInput.value = codeInput.value.replace(/[^0-9]/g, '');
-            });
-        }
-
-        verifyForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const code = codeInput.value.trim();
-
-            const { data, error } = await _supabase.auth.verifyOtp({
-                email: tempEmail,
-                token: code,
-                type: 'signup'
-            });
-
-            if (error) {
-                showToast(`Error de verificación: ${error.message}`, "error");
-                return;
-            }
-
-            await syncSession();
-            safeStorage.removeItem('techlog_temp_email');
-
-            showToast("¡Cuenta verificada exitosamente! Bienvenido.", "success");
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 1500);
+            }, 4000);
         });
     }
+
+
 
     // --- ADMIN PANEL LOGIC ---
     const adminPanelGrid = document.getElementById('admin-panel-grid');
