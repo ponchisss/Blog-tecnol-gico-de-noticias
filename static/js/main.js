@@ -837,21 +837,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        // Mailbox Pane update
-        const refreshMockMailbox = () => {
-            const mailList = document.getElementById('mailbox-list-container');
-            if (!mailList) return;
 
-            mailList.innerHTML = `
-                <div style="text-align:center; padding:3rem; color:var(--text-muted); border: 1px dashed rgba(255,255,255,0.1); border-radius: 10px;">
-                    <span style="font-size: 3rem;">📧</span>
-                    <h3 style="margin-top: 1rem; color: var(--accent-teal);">Verificación en Tiempo Real Activa</h3>
-                    <p style="margin-top: 0.5rem; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.5;">
-                        La aplicación ahora está conectada directamente a <strong>Supabase Auth</strong>. El sistema enviará un código de verificación real a la bandeja de entrada del correo del usuario registrado. ¡Ya no se requiere un buzón simulado en local!
-                    </p>
-                </div>
-            `;
-        };
 
         // Settings Form (Optional configurations for EmailJS)
         const settingsForm = document.getElementById('settings-emailjs-form');
@@ -1013,17 +999,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        const mailboxRefreshBtn = document.getElementById('mailbox-refresh-btn');
-        if (mailboxRefreshBtn) {
-            mailboxRefreshBtn.addEventListener('click', () => {
-                refreshMockMailbox();
-                showToast("Buzón virtual actualizado.", "success");
-            });
-        }
-
         // Init admin tables
         await renderAdminArticles();
         await renderAdminUsers();
-        refreshMockMailbox();
     }
 });

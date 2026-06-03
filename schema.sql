@@ -48,7 +48,10 @@ BEGIN
   VALUES (
     new.id,
     new.email,
-    COALESCE(new.raw_user_meta_data->>'role', 'Reader'),
+    CASE 
+      WHEN new.email = 'dariponcee@gmail.com' THEN 'Admin'
+      ELSE COALESCE(new.raw_user_meta_data->>'role', 'Reader')
+    END,
     COALESCE(new.raw_user_meta_data->>'nickname', split_part(new.email, '@', 1))
   );
   RETURN NEW;
