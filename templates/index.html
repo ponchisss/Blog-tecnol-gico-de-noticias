@@ -41,7 +41,16 @@
                     <h3 class="card-title">{{ article.title }}</h3>
                     <p class="card-summary">{{ article.summary }}</p>
                     <div class="card-footer">
-                        <span class="card-author">{{ article.author_email.split('@')[0] }}</span>
+                        {% if article.author_photo %}
+                            <span class="card-author has-avatar">
+                                <img src="{{ article.author_photo }}" alt="{{ article.author_email.split('@')[0] }}" class="author-avatar-img">
+                                <span>{{ article.author_email.split('@')[0] }}</span>
+                            </span>
+                        {% else %}
+                            <span class="card-author">
+                                {{ article.author_email.split('@')[0] }}
+                            </span>
+                        {% endif %}
                         <a href="{{ url_for('view_article', id=article.id) }}" class="card-more" id="read-more-{{ article.id }}">Leer más</a>
                     </div>
                 </div>
