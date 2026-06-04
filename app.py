@@ -103,7 +103,7 @@ def index():
     conn = database.get_db_connection()
     
     sql = """
-        SELECT a.*, u.email as author_email 
+        SELECT a.*, u.email as author_email, u.photo_url as author_photo 
         FROM articles a 
         JOIN users u ON a.author_id = u.id
     """
