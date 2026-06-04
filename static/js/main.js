@@ -187,15 +187,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Markdown/HTML Translation helper ---
     function parseMarkdown(text) {
         if (!text) return "";
-        return text
-            .replace(/\r\n/g, '\n')
-            .replace(/\n/g, '<br>')
-            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-            .replace(/##\s*([^\n<]+)/g, '<h2>$1</h2>')
-            .replace(/#\s*([^\n<]+)/g, '<h1>$1</h1>')
-            .replace(/>\s*([^\n<]+)/g, '<blockquote>$1</blockquote>')
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#a78bfa;text-decoration:underline;">$1</a>');
+        
+        let html = text;
+        
+        // Normalize newlines
+        html = html.replace(/\r\n/g, '\n');
+        
+        // Block elements (Headings, Blockquotes)
+        html = html.replace(/^##\s*(.+)$/gm, '<h2>$1</h2>');
+        html = html.replace(/^#\s*(.+)$/gm, '<h1>$1</h1>');
+        html = html.replace(/^>\s*(.+)$/gm, '<blockquote>$1</blockquote>');
+        
+        // Inline elements (Bold, Italic, Links)
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:#a78bfa;text-decoration:underline;">$1</a>');
+        
+        // Convert remaining newlines to <br>
+        html = html.replace(/\n/g, '<br>');
+        
+        return html;
     }
 
     // --- PASSWORD VISIBILITY TOGGLE ---
