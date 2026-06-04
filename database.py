@@ -23,10 +23,17 @@ def init_db():
         role TEXT NOT NULL DEFAULT 'Reader',
         is_verified INTEGER NOT NULL DEFAULT 0,
         verification_code TEXT,
+        photo_url TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
     
+    # Migration: add photo_url to users table if it does not exist
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN photo_url TEXT")
+    except sqlite3.OperationalError:
+        pass
+        
     # Create articles table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS articles (
