@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             const { data: dbArticles, error } = await _supabase
                 .from('articles')
-                .select('*, users(email, nickname)');
+                .select('*, users(email, nickname, photo_url)');
 
             if (error) {
                 articlesShowcaseGrid.innerHTML = `<div class="no-results" style="grid-column: 1 / -1;"><span style="font-size: 3rem;">❌</span><h3>Error al conectar con Supabase</h3><p>${error.message}</p></div>`;
@@ -332,7 +332,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const articles = dbArticles.map(art => ({
                 ...art,
-                author_name: art.users ? (art.users.nickname || art.users.email.split('@')[0]) : 'desconocido'
+                author_name: art.users ? (art.users.nickname || art.users.email.split('@')[0]) : 'desconocido',
+                author_photo: art.users ? art.users.photo_url : null
             }));
 
             // Filter
@@ -349,7 +350,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             if (filtered.length > 0) {
-                articlesShowcaseGrid.innerHTML = filtered.map(art => `
+                articlesShowcaseGrid.innerHTML = filtered.map(art => {
+                    let authorHTML = '';
+                    if (art.author_photo) {
+                        authorHTML = `
+                            <span class="card-author has-avatar">
+                                <img src="${art.author_photo}" alt="${art.author_name}" class="author-avatar-img">
+                                <span>${art.author_name}</span>
+                            </span>
+                        `;
+                    } else {
+                        authorHTML = `
+                            <span class="card-author">
+                                ${art.author_name}
+                            </span>
+                        `;
+                    }
+                    return `
                     <article class="article-card" id="article-card-${art.id}">
                         <div class="card-img-wrapper">
                             <img src="${art.image_url}" alt="${art.title}" class="card-img" loading="lazy">
@@ -360,12 +377,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <h3 class="card-title">${art.title}</h3>
                             <p class="card-summary">${art.summary}</p>
                             <div class="card-footer">
-                                <span class="card-author">${art.author_name}</span>
+                                ${authorHTML}
                                 <a href="article.html?id=${art.id}" class="card-more" id="read-more-${art.id}">Leer más</a>
                             </div>
                         </div>
                     </article>
-                `).join('');
+                `}).join('');
             } else {
                 articlesShowcaseGrid.innerHTML = `
                     <div class="no-results" id="no-results-alert" style="grid-column: 1 / -1; width: 100%;">
@@ -526,6 +543,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (password.length < 6) {
                 showToast("La contraseña debe tener al menos 6 caracteres.", "error");
+                return;
+            }
+
+            // Check if email is already registered in public.users table to prevent false success/verification message
+            const { data: existingUser, error: checkError } = await _supabase
+                .from('users')
+                .select('email')
+                .eq('email', email)
+                .maybeSingle();
+
+            if (checkError) {
+                console.error("Error verifying email existence:", checkError);
+            }
+
+            if (existingUser) {
+                showToast("Este correo electrónico ya está registrado.", "error");
                 return;
             }
 
